@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Plans avec Panneaux de Signalisation</title>
+    <!-- Ajout de la bibliothèque Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <!-- Ajout de la bibliothèque jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Barre d'outils -->
+        <header class="toolbar">
+            <div class="tool-group" id="main-tools">
+                <strong>Outils :</strong>
+                <button id="btn-undo" class="tool" title="Annuler (Ctrl+Z)" disabled>↩️</button>
+                <button id="btn-redo" class="tool" title="Rétablir (Ctrl+Y)" disabled>↪️</button>
+                <button id="btn-select" class="tool active" title="Sélectionner Objet">🖐️</button>
+                <button id="btn-layer-move" class="tool" title="Déplacer Calque / Vue">✥</button>
+                <button id="btn-draw" class="tool" title="Dessiner Ligne">〰️</button>
+                <button id="btn-curve" class="tool" title="Dessiner Courbe">︵</button>
+                <button id="btn-circle" class="tool" title="Dessiner Cercle">⚪</button>
+            </div>
+            <div class="tool-group" id="measure-tools">
+                <strong>Mesures :</strong>
+                <button id="btn-scale" class="tool" title="Définir l'échelle graphiquement">📏</button>
+                <button id="btn-measure" class="tool" title="Mesurer une distance">Mesurer</button>
+            </div>
+            <div class="tool-group" id="zoom-tools">
+                <strong>Vue :</strong>
+                <button id="btn-zoom-out" title="Zoom arrière">-</button>
+                <span id="zoom-level-display" title="Affichage en pourcentage">100%</span>
+                <button id="btn-zoom-in" title="Zoom avant">+</button>
+                <button id="btn-toggle-webview" title="Afficher la carte interactive">🌍</button>
+                <button id="btn-fullscreen" title="Mode Plein Écran">⛶</button>
+            </div>
+            <div class="tool-group permanent-tools" id="project-tools">
+                <strong>Projet :</strong>
+                <button id="btn-save-project" title="Sauvegarder le projet" disabled>💾</button>
+                <button id="btn-load-project" title="Charger un projet">📁</button>
+                <button id="btn-new-project" title="Nouveau projet">📄</button>
+            </div>
+            <div class="tool-group" id="object-tools">
+                <strong>Ajouter Objet :</strong>
+                <button id="btn-add-signs" title="Ajouter un Panneau">🚦</button>
+                <button id="btn-add-car" title="Ajouter Voiture">🚗</button>
+                <button id="btn-add-arrow" title="Ajouter Flèche">➡️</button>
+                <button id="btn-add-text" title="Ajouter Texte">T</button>
+                <button id="btn-crossing" class="tool" title="Dessiner Passage Piéton">🚸</button>
+                <button id="btn-yield" class="tool" title="Dessiner Céder le Passage">▽</button>
+                <button id="btn-fill" class="tool" title="Remplir une zone fermée">🎨</button>
+                <button id="btn-baseline" class="tool" title="Dessiner Ligne de Base">LB</button>
+                <button id="btn-skid-mark" class="tool" title="Dessiner Trace de Freinage">TF</button>
+                <button id="btn-add-landmark" class="tool" title="Ajouter un Point de Repère">📍</button>
+                <span class="landmark-visibility-control">
+                    <label for="toggle-landmarks-checkbox" style="cursor:pointer;" title="Afficher/Cacher les Repères">📍 Visible :</label>
+                    <input type="checkbox" id="toggle-landmarks-checkbox" checked>
+                    <label for="toggle-landmark-coords-checkbox" style="cursor:pointer;" title="Afficher/Cacher les coordonnées des Repères">Coords :</label>
+                    <input type="checkbox" id="toggle-landmark-coords-checkbox" checked>
+                </span>
+            </div>
+            <div class="tool-group options-group" id="drawing-options-tools" style="display: flex;">
+                <strong>Options dessin :</strong>
+                <label for="color-picker">Couleur:</label> <input type="color" id="color-picker" value="#000000">
+                <label for="thickness-selector">Épaisseur:</label>
+                <select id="thickness-selector">
+                    <option value="1">Très fine</option>
+                    <option value="2" selected>Fine</option>
+                    <option value="4">Moyenne</option>
+                    <option value="8">Épaisse</option>
+                    <option value="16">Très Épaisse</option>
+                </select>
+                <label for="dashed-checkbox">Pointillés:</label> <input type="checkbox" id="dashed-checkbox">
+                <span id="dash-spacing-container" style="display: none;">
+                    <label for="dash-spacing-selector">Espacement:</label>
+                    <select id="dash-spacing-selector">
+                        <option value="2">Serré</option>
+                        <option value="4" selected>Normal</option>
+                        <option value="8">Espacé</option>
+                        <option value="16">Très Espacé</option>
+                    </select>
+                </span>
+            </div>
+            <div class="tool-group options-group" id="shape-options-tools" style="display: none;">
+                <strong>Options formes :</strong>
+                <label for="color-picker-shape">Couleur:</label> <input type="color" id="color-picker-shape" value="#000000">
+                <label for="thickness-selector-shape">Épaisseur:</label>
+                <select id="thickness-selector-shape">
+                    <option value="1">Très fine</option>
+                    <option value="2" selected>Fine</option>
+                    <option value="4">Moyenne</option>
+                    <option value="8">Épaisse</option>
+                    <option value="16">Très Épaisse</option>
+                </select>
+            </div>
+            <div class="tool-group options-group" id="text-options-tools" style="display: none;">
+                <strong>Texte :</strong>
+                <label for="color-picker-text">Couleur:</label> <input type="color" id="color-picker-text" value="#000000">
+                <label for="font-family-selector">Police:</label>
+                <select id="font-family-selector">
+                    <option value="Arial" selected>Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Courier New">Courier New</option>
+                </select>
+                <label for="font-size-selector">Taille:</label>
+                <select id="font-size-selector">
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                    <option value="20" selected>20</option>
+                    <option value="24">24</option>
+                    <option value="28">28</option>
+                    <option value="32">32</option>
+                    <option value="36">36</option>
+                    <option value="48">48</option>
+                </select>
+                <button id="font-bold-btn" class="text-style-btn" title="Gras">B</button>
+                <button id="font-italic-btn" class="text-style-btn" title="Italique">I</button>
+                <button id="font-underline-btn" class="text-style-btn" title="Souligné">U</button>
+            </div>
+            <div class="tool-group options-group" id="fill-options-tools" style="display: none;">
+                <strong>Remplissage :</strong>
+                <label for="color-picker-fill">Couleur:</label> <input type="color" id="color-picker-fill" value="#000000">
+                <input type="radio" id="fill-type-solid" name="fill-type" value="solid" checked>
+                <label for="fill-type-solid" style="cursor:pointer;">Solide</label>
+                <input type="radio" id="fill-type-stripes" name="fill-type" value="stripes">
+                <label for="fill-type-stripes" style="cursor:pointer;">Rayures</label>
+                <span id="stripe-angle-container" style="display: none; align-items: center; gap: 8px;">
+                    <label for="stripe-angle-slider">Angle:</label>
+                    <input type="range" id="stripe-angle-slider" min="0" max="180" value="30" style="width: 80px;">
+                    <span id="stripe-angle-display">30°</span>
+                    <label for="stripe-thickness-slider" style="margin-left: 10px;">Épaisseur:</label>
+                    <input type="range" id="stripe-thickness-slider" min="1" max="10" value="2" style="width: 80px;">
+                    <span id="stripe-thickness-display">2px</span>
+                 </span>
+                <span style="display: flex; align-items: center; gap: 8px; margin-left: 10px;">
+                    <label for="fill-tolerance-slider">Tolérance:</label>
+                    <input type="range" id="fill-tolerance-slider" min="1" max="100" value="30" style="width: 80px;">
+                    <span id="fill-tolerance-display">30</span>
+                </span>
+            </div>
+            <div class="tool-group" id="export-tools" style="margin-left: auto;">
+                <button id="btn-export-png">Exporter en PNG</button>
+                <button id="btn-export-pdf">Exporter en PDF</button>
+            </div>
+        </header>
+
+        <!-- Zone de dessin principale -->
+        <main id="canvas-container">
+            <div id="scroll-content">
+                <div id="zoom-wrapper">
+                </div>
+            </div>
+            <div id="guide-message">
+                <h2>Commencez par ajouter une image</h2>
+                <p>Utilisez le bouton 🖼️ dans la barre des calques en bas.</p>
+            </div>
+        </main>
+            <!-- Conteneur pour la vue web -->
+            <div id="webview-container" style="display: none;">
+                <iframe id="webview-frame" src=""></iframe>
+                <button id="btn-close-webview">Retour à l'éditeur</button>
+            </div>
+        </main>
+
+        <!-- Panneau des calques -->
+        <footer class="layers-panel">
+            <div class="layer-controls">
+                <button id="add-image-btn" title="Ajouter une image de fond">🖼️</button>
+                <input type="file" id="image-loader" accept="image/*" style="display:none;">
+                <button id="add-image-layer-btn" title="Ajouter un calque image">➕🖼️</button>
+                <input type="file" id="image-layer-loader" accept="image/*" style="display:none;">
+                <button id="start-drawing-btn" title="Créer un calque de dessin" style="display: none;">✏️</button>
+                <span class="separator"></span>
+            </div>
+            <ul id="layers-list">
+                <!-- Les calques seront ajoutés ici par JavaScript -->
+            </ul>
+        </footer>
+    </div>
+    
+    <!-- Fenêtre modale pour les panneaux -->
+    <div id="signs-modal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h2>Choisissez un panneau de signalisation</h2>
+                <span class="close-button">×</span>
+            </header>
+            <main id="signs-grid" class="modal-body"></main>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour l'échelle -->
+    <div id="scale-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h2>Définir l'échelle de l'image</h2>
+                <span class="close-button" id="close-scale-modal">×</span>
+            </header>
+            <main class="modal-body">
+                <p>Entrez l'échelle de l'image (ex: 1:X où 1cm sur le plan = X cm sur le terrain).</p>
+                <div class="form-group">
+                    <label for="scale-input-plan">Sur le plan :</label>
+                    <span>1 cm</span>
+                </div>
+                <div class="form-group">
+                    <label for="scale-input-terrain">Équivaut à (sur le terrain) :</label>
+                    <input type="number" id="scale-input-terrain" min="1" placeholder="Ex: 500 (pour 1:500)">
+                    <span>cm</span>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="scale-unknown-checkbox">
+                    <label for="scale-unknown-checkbox">Échelle inconnue (définir graphiquement plus tard)</label>
+                </div>
+                <button id="submit-scale-btn">Valider et Ajouter l'Image</button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour les repères -->
+    <div id="landmark-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h2>Ajouter un Point de Repère</h2>
+                <span class="close-button" id="close-landmark-modal">×</span>
+            </header>
+            <main class="modal-body">
+                <p>Entrez les coordonnées du repère par rapport à la ligne de base et au point 0 (en mètres).</p>
+                <div class="form-group">
+                    <label for="landmark-x-input">Abscisse (X) :</label>
+                    <input type="number" id="landmark-x-input" value="0" placeholder="Distance horizontale">
+                    <span>m</span>
+                </div>
+                <div class="form-group">
+                    <label for="landmark-y-input">Ordonnée (Y) :</label>
+                    <input type="number" id="landmark-y-input" value="0" placeholder="Distance verticale">
+                    <span>m</span>
+                </div>
+                <button id="submit-landmark-btn">Ajouter le Repère</button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour les véhicules -->
+    <div id="vehicle-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h2>Propriétés du Véhicule</h2>
+                <span class="close-button" id="close-vehicle-modal">×</span>
+            </header>
+            <main class="modal-body">
+                <p>Configurez les propriétés du véhicule.</p>
+                <div class="form-group">
+                    <label for="vehicle-width-input">Largeur :</label>
+                    <input type="number" id="vehicle-width-input" value="1.8" placeholder="ex: 1.8">
+                    <span>m</span>
+                </div>
+                <div class="form-group">
+                    <label for="vehicle-length-input">Longueur :</label>
+                    <input type="number" id="vehicle-length-input" value="4.5" placeholder="ex: 4.5">
+                    <span>m</span>
+                </div>
+                <div class="form-group">
+                    <label for="vehicle-letter-input">Lettre d'identification :</label>
+                    <input type="text" id="vehicle-letter-input" maxlength="1" placeholder="A" value="A">
+                </div>
+                <div class="form-group">
+                    <label for="vehicle-color-input">Couleur :</label>
+                    <input type="color" id="vehicle-color-input" value="#000000">
+                </div>
+                <div class="form-group">
+                    <label for="vehicle-thickness-input">Épaisseur du trait :</label>
+                    <input type="range" id="vehicle-thickness-input" min="1" max="10" value="2">
+                    <span id="vehicle-thickness-display">2px</span>
+                </div>
+                <button id="submit-vehicle-btn">Ajouter le Véhicule</button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour le guide d'alignement -->
+    <div id="alignment-guide-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h2>Aligner le nouveau calque</h2>
+                <span class="close-button">×</span>
+            </header>
+            <main class="modal-body">
+                <p>Le nouveau calque a été ajouté. Veuillez l'aligner avec le plan de fond :</p>
+                <ol>
+                    <li>Utilisez le <strong>curseur d'opacité</strong> sur le calque (en bas) pour voir à travers.</li>
+                    <li>Avec l'outil <strong>Déplacer (✥)</strong> actif, cliquez et glissez le calque pour le positionner correctement.</li>
+                </ol>
+            </main>
+        </div>
+    </div>
+
+	<!-- Fenêtre modale pour le choix d'ajout de calque -->
+    <div id="add-layer-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h2>Ajouter un calque image</h2>
+                <span class="close-button">×</span>
+            </header>
+            <main class="modal-body add-layer-options">
+                <button id="btn-load-from-file">
+                    <span class="icon">📁</span>
+                    <span>Charger un fichier</span>
+                </button>
+                <button id="btn-paste-from-clipboard">
+                    <span class="icon">📋</span>
+                    <span>Coller depuis le presse-papiers</span>
+                </button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour la légende PDF -->
+    <div id="legend-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; height: auto;">
+            <header class="modal-header">
+                <h2>Légende du document PDF</h2>
+                <span class="close-button" id="close-legend-modal">×</span>
+            </header>
+            <main class="modal-body">
+                <p>Veuillez vérifier et modifier la légende si nécessaire.</p>
+                <textarea id="legend-textarea" rows="10" style="width: 100%; box-sizing: border-box;"></textarea>
+                <button id="submit-legend-btn">Valider et Exporter en PDF</button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Fenêtre modale pour la saisie de texte -->
+    <div id="text-input-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <header class="modal-header">
+                <h2>Ajouter du texte</h2>
+                <span class="close-button" id="close-text-modal">×</span>
+            </header>
+            <main class="modal-body">
+                <p>Entrez le texte que vous souhaitez ajouter au plan :</p>
+                <div class="form-group">
+                    <textarea id="text-input-textarea" placeholder="Tapez votre texte ici..." rows="4" style="width: 100%; box-sizing: border-box; resize: vertical;"></textarea>
+                </div>
+                <div class="form-group">
+                    <button id="submit-text-btn" class="submit-button">Ajouter le texte</button>
+                    <button id="cancel-text-btn" class="cancel-button">Annuler</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bulle de guidage pour l'outil ajouter calque dessin -->
+    <div id="drawing-guide-tooltip" class="guide-tooltip" style="display: none;">
+        <div class="tooltip-content">
+            <p>Quand vous avez fini d'orienter le calque et de l'avoir centré, cliquez ici</p>
+            <div class="tooltip-arrow"></div>
+        </div>
+    </div>
+
+    <!-- SOLUTION SANS SERVEUR : Chargement des scripts dans l'ordre -->
+    
+    <!-- 1. D'abord l'état global -->
+    <script>
+        // Namespace global pour éviter les conflits
+        window.PlanEditor = window.PlanEditor || {};
+        console.log('✅ Namespace PlanEditor créé');
+    </script>
+    
+    <!-- 2. Ensuite les modules dans l'ordre de dépendance -->
+    <script src="modules/state.js"></script>
+    <script src="modules/layers.js"></script>
+    <script src="modules/canvas.js"></script>
+    <script src="modules/tools.js"></script>
+    <script src="modules/project.js"></script>
+    <script src="modules/ui.js"></script>
+    <script src="modules/export.js"></script>
+    <script src="modules/events.js"></script>
+	<script src="modules/projections.js"></script>    
+    <!-- 3. Enfin l'initialisation -->
+    <script src="app.js"></script>
+</body>
+</html>
