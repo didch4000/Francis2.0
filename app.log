@@ -1,0 +1,746 @@
+ ✅ Namespace PlanEditor créé
+ 🚀 Initialisation de l'application...
+ ✅ Tous les modules sont chargés
+ ✅ Éléments DOM trouvés
+ ✅ Managers créés
+ ✅ Instances exposées globalement
+ 🔧 Initialisation UIManager...
+ ✅ SignsModal peuplée
+ ✅ UI Tools State mis à jour
+ ✅ Fill Options UI mis à jour
+ ✅ Guide Message mis à jour
+ 🔄 Aucun calque actif - boutons undo/redo désactivés
+ ✅ Undo/Redo Buttons mis à jour
+ ✅ Color Picker initialisé
+ ✅ Dashed Checkbox configuré
+ ✅ Project Tools State et surveillant initialisés
+ ✅ UIManager initialisé
+ ✅ UI initialisée
+ ✅ Events initialisés
+ ✅ Application initialisée avec succès
+ 👀 [PROJECT TOOLS] Démarrage du surveillant des styles
+ 🔧 [PROJECT TOOLS] Mise à jour état des outils de projet
+ 🔍 [PROJECT TOOLS] Calques disponibles: Array(0)
+ 🔍 [PROJECT TOOLS] Calque de dessin trouvé: false
+ 💉 [PROJECT TOOLS] CSS ultime injecté dans le document
+ 🔄 [PROJECT TOOLS] Recalculation forcée du style
+ 🧹 [PROJECT TOOLS] Styles inline nettoyés pour btn-save-project
+ 🧹 [PROJECT TOOLS] Styles inline nettoyés pour btn-load-project
+ 🧹 [PROJECT TOOLS] Styles inline nettoyés pour btn-new-project
+ 🛡️ [PROJECT TOOLS] Propriétés anti-curseur forcées sur btn-save-project
+ 🛡️ [PROJECT TOOLS] Propriétés anti-curseur forcées sur btn-load-project
+ 🛡️ [PROJECT TOOLS] Propriétés anti-curseur forcées sur btn-new-project
+ 🔗 [PROJECT TOOLS] Attachement INITIAL des événements projet
+ 🔗 [PROJECT TOOLS] SAVE événement attaché
+ 🔗 [PROJECT TOOLS] LOAD événement attaché
+ 🔗 [PROJECT TOOLS] NEW événement attaché
+ ✅ [PROJECT TOOLS] Événements projet attachés avec succès
+ 🔗 [PROJECT TOOLS] Événements projet initialisés
+ 🎨 [Z-INDEX] Calque dessin "Image de fond" créé avec z-index=100
+ DEBUG: Anciens gestionnaires supprimés pour éviter duplication
+ 🎨 [DEBUG] Configuration curseurs Fabric.js - Mode CSS uniquement
+ ✅ [DEBUG] Tous les curseurs Fabric forcés à inherit
+ 🎯 [GLOBAL INTERCEPT] ActiveSelection interceptée globalement
+ ✅ Canvas listeners configurés pour le calque Image de fond
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at LayerManager.createLayer (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:519:34)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: select
+ 💾 État sauvegardé - Pile undo: 1 états
+   [0] 0 objets
+   Pile redo: 0 états
+ 🔄 Aucun calque actif - boutons undo/redo désactivés
+ 📝 [UNDO DEBUG] Calque créé avec sauvegarde initiale: Image de fond
+ 🔧 [PROJECT TOOLS] Mise à jour état des outils de projet
+ 🔍 [PROJECT TOOLS] Calques disponibles: Array(1)
+ 🔍 [PROJECT TOOLS] Calque de dessin trouvé: true
+ 💉 [PROJECT TOOLS] CSS existant supprimé, réinjection forcée
+ 💉 [PROJECT TOOLS] CSS ultime injecté dans le document
+ 🔄 [PROJECT TOOLS] Recalculation forcée du style
+ 🧹 [PROJECT TOOLS] Styles inline nettoyés pour btn-save-project
+ 🧹 [PROJECT TOOLS] Styles inline nettoyés pour btn-load-project
+ 🧹 [PROJECT TOOLS] Styles inline nettoyés pour btn-new-project
+ 🛡️ [PROJECT TOOLS] Propriétés anti-curseur forcées sur btn-save-project
+ 🛡️ [PROJECT TOOLS] Propriétés anti-curseur forcées sur btn-load-project
+ 🛡️ [PROJECT TOOLS] Propriétés anti-curseur forcées sur btn-new-project
+ ❌ [DEBUG] Annulation du dessin
+ 🎯 [DEBUG] Mise à jour curseur pour mode: select
+ ⚠️ Outil select désactivé
+ ⚠️ [DEBUG] Outil désactivé, curseur interdit
+ ✅ [DEBUG] Annulation terminée
+ 🎯 [DEBUG] Mise à jour curseur pour mode: layer-move
+ ✅ [DEBUG] Application curseur: layer-move-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: layer-move-cursor
+ ❌ [DEBUG] Annulation du dessin
+ 🎯 [DEBUG] Mise à jour curseur pour mode: layer-move
+ ✅ [DEBUG] Application curseur: layer-move-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: layer-move-cursor
+ ✅ [DEBUG] Annulation terminée
+ 🎯 [DEBUG] Mise à jour curseur pour mode: scale
+ ✅ [DEBUG] Application curseur: scale-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: scale-cursor
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 131.0361593134478, 733.6157817109145
+ 🖱️ [DEBUG] Mouse down - Mode: scale, Target: none
+ 🖱️ [DEBUG] Démarrage du dessin
+ 🎯 [DEBUG] Début du dessin, mode: scale
+ 🔄 Changement d'état curseur: drawing
+ 📏 [DEBUG] Mode échelle activé
+ ✅ [DEBUG] Guide créé pour mode: scale
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 131.0361593134478, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 132.1851268701077, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 134.48306198342752, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 135.63202954008742, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 141.37686732338696, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 148.2706726633464, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 150.5686077766662, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 152.86654288998602, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 156.31344555996574, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 158.61138067328557, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 160.90931578660536, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 166.6541535699049, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 167.8031211265648, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 171.25002379654453, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 172.39899135320442, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 174.69692646652425, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 175.84589402318414, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 178.14382913650397, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 180.4417642498238, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 185.0376344764634, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 188.48453714644313, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 189.63350470310303, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 190.78247225976295, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 191.93143981642285, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 193.08040737308275, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 194.22937492974268, 733.6157817109145
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 195.37834248640257, 733.6157817109145
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 196.52731004306247, 733.6157817109145
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 197.6762775997224, 733.6157817109145
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 197.6762775997224, 734.764749262537
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 198.8252451563823, 734.764749262537
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 198.8252451563823, 735.9137168141593
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 201.1231802697021, 735.9137168141593
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 203.4211153830219, 737.0626843657817
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 204.5700829396818, 738.2116519174042
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 205.71905049634174, 738.2116519174042
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 208.01698560966153, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 210.31492072298136, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 211.46388827964125, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 213.76182339296108, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 214.91079094962097, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 216.0597585062809, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 217.2087260629408, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 218.3576936196007, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 219.50666117626062, 739.3606194690266
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 219.50666117626062, 738.2116519174042
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 220.65562873292052, 737.0626843657817
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 221.80459628958042, 737.0626843657817
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 222.95356384624034, 735.9137168141593
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 224.10253140290024, 734.764749262537
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 225.25149895956014, 734.764749262537
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 226.40046651622006, 734.764749262537
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 226.40046651622006, 733.6157817109145
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 227.54943407287996, 732.4668141592921
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 0.8703465982028241, Coordonnées: 227.54943407287996, 732.4668141592921
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🏁 [DEBUG] Fin du dessin, mode: scale
+ 🎯 [DEBUG] Mise à jour curseur pour mode: scale
+ ✅ [DEBUG] Application curseur: scale-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: scale-cursor
+ 📏 [DEBUG] Traitement de l'échelle
+ 🔒 [DEBUG] Zoom verrouillé à l'échelle finale: 200
+ 🔄 [DEBUG] Mode scale - changement de mode différé
+ ✅ [DEBUG] Fin du dessin terminée
+ ❌ [DEBUG] Annulation du dessin
+ 🎯 [DEBUG] Mise à jour curseur pour mode: scale
+ ⚠️ Outil scale désactivé
+ ⚠️ [DEBUG] Outil désactivé, curseur interdit
+ ✅ [DEBUG] Annulation terminée
+ 🎯 [DEBUG] Mise à jour curseur pour mode: layer-move
+ ✅ [DEBUG] Application curseur: layer-move-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: layer-move-cursor
+ ❌ [DEBUG] Annulation du dessin
+ 🎯 [DEBUG] Mise à jour curseur pour mode: layer-move
+ 🎯 [DEBUG] Mode sélection de zone actif (priorité haute)
+ ✅ [DEBUG] Annulation terminée
+ 🎯 [DEBUG] Mise à jour curseur pour mode: select
+ 🎯 [DEBUG] Mode sélection de zone actif (priorité haute)
+ ✅ Mode sélection de zone activé
+ 🎯 [DEBUG] Mise à jour curseur pour mode: select
+ 🎯 [DEBUG] Mode sélection de zone actif (priorité haute)
+ 🔄 Changement d'état curseur: area-selecting
+ 🎨 [Z-INDEX] Calque dessin "Plan rogné" créé avec z-index=100
+ DEBUG: Anciens gestionnaires supprimés pour éviter duplication
+ 🎨 [DEBUG] Configuration curseurs Fabric.js - Mode CSS uniquement
+ ✅ [DEBUG] Tous les curseurs Fabric forcés à inherit
+ 🎯 [GLOBAL INTERCEPT] ActiveSelection interceptée globalement
+ ✅ Canvas listeners configurés pour le calque Plan rogné
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at LayerManager.createLayer (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:519:34)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: select
+ 💾 État sauvegardé - Pile undo: 1 états
+   [0] 0 objets
+   Pile redo: 0 états
+ 🔄 Aucun calque actif - boutons undo/redo désactivés
+ 📝 [UNDO DEBUG] Calque créé avec sauvegarde initiale: Plan rogné
+ 🔒 [DEBUG] Tentative de zoom bloquée - échelle verrouillée
+ 🎨 [Z-INDEX] Calque dessin "Calque de dessin" créé avec z-index=100
+ DEBUG: Anciens gestionnaires supprimés pour éviter duplication
+ 🎨 [DEBUG] Configuration curseurs Fabric.js - Mode CSS uniquement
+ ✅ [DEBUG] Tous les curseurs Fabric forcés à inherit
+ 🎯 [GLOBAL INTERCEPT] ActiveSelection interceptée globalement
+ ✅ Canvas listeners configurés pour le calque Calque de dessin
+ 📝 [UNDO DEBUG] Calque créé avec sauvegarde initiale: Calque de dessin
+ DEBUG: Anciens gestionnaires supprimés pour éviter duplication
+ 🎨 [DEBUG] Configuration curseurs Fabric.js - Mode CSS uniquement
+ ✅ [DEBUG] Tous les curseurs Fabric forcés à inherit
+ 🎯 [GLOBAL INTERCEPT] ActiveSelection interceptée globalement
+ 🔧 [DEBUG] Remise du zoom à l'échelle finale: 1 pour échelle 1: 200
+ 🔓 [DEBUG] Zoom déverrouillé après création du calque dessin
+ ❌ [DEBUG] Annulation du dessin
+ 🎯 [DEBUG] Mise à jour curseur pour mode: select
+ ✅ [DEBUG] Application curseur: select-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: select-cursor
+ ✅ [DEBUG] Annulation terminée
+ 🎯 [DEBUG] Mise à jour curseur pour mode: select
+ ✅ [DEBUG] Application curseur: select-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: select-cursor
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:46:22
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: select
+ 💾 État sauvegardé - Pile undo: 1 états
+   [0] 0 objets
+   Pile redo: 0 états
+ 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 1 undoCount: 0 redoCount: 0
+ 🔄 Historique: 0 undo (désactivé), 0 redo (désactivé)
+ ❌ [DEBUG] Annulation du dessin
+ 🎯 [DEBUG] Mise à jour curseur pour mode: select
+ ✅ [DEBUG] Application curseur: select-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: select-cursor
+ ✅ [DEBUG] Annulation terminée
+ 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+ ✅ [DEBUG] Application curseur: draw-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+ 🔍 [ZOOM DEBUG] EVENTS SANS CORRECTION - Zoom: 1, Coords: 860.5, -23.5
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 860.5, -23.5
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🏁 [DEBUG] Fin du dessin, mode: draw
+ 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+ ✅ [DEBUG] Application curseur: draw-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at CanvasManager.createLine (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/canvas.js:716:47)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: draw
+ 💾 État sauvegardé - Pile undo: 2 états
+   [0] 0 objets
+   [1] 1 objets
+   Pile redo: 0 états
+ 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 2 undoCount: 1 redoCount: 0
+ 🔄 Historique: 1 undo (activé), 0 redo (désactivé)
+ ✅ [DEBUG] Fin du dessin terminée
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 181.5, 319.5
+ 🖱️ [DEBUG] Mouse down - Mode: draw, Target: none
+ 🖱️ [DEBUG] Démarrage du dessin
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] EVENTS SANS CORRECTION - Zoom: 1, Coords: 181.5, 319.5
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 181.5, 317.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 181.5, 317.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 181.5, 314.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 181.5, 314.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 181.5, 310.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 181.5, 310.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 181.5, 294.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 181.5, 294.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 181.5, 269.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 181.5, 269.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 182.5, 250.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 182.5, 250.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 184.5, 214.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 184.5, 214.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 185.5, 180.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 185.5, 180.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 185.5, 168.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 185.5, 168.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 186.5, 154.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 186.5, 154.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 186.5, 151.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 186.5, 151.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 186.5, 143.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 186.5, 143.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 186.5, 140.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 186.5, 140.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 186.5, 139.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 186.5, 139.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 186.5, 139.5
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🏁 [DEBUG] Fin du dessin, mode: draw
+ 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+ ✅ [DEBUG] Application curseur: draw-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at CanvasManager.createLine (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/canvas.js:716:47)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: draw
+ 💾 État sauvegardé - Pile undo: 3 états
+   [0] 0 objets
+   [1] 1 objets
+   [2] 3 objets
+   Pile redo: 0 états
+ 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 3 undoCount: 2 redoCount: 0
+ 🔄 Historique: 2 undo (activé), 0 redo (désactivé)
+ ✅ [DEBUG] Fin du dessin terminée
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 87.5, 226.5
+ 🖱️ [DEBUG] Mouse down - Mode: draw, Target: none
+ 🖱️ [DEBUG] Démarrage du dessin
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] EVENTS SANS CORRECTION - Zoom: 1, Coords: 87.5, 226.5
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 90.5, 226.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 90.5, 226.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 106.5, 224.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 106.5, 224.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 117.5, 222.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 117.5, 222.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 145.5, 220.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 145.5, 220.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 159.5, 220.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 159.5, 220.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 190.5, 219.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 190.5, 219.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 211.5, 219.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 211.5, 219.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 218.5, 219.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 218.5, 219.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 236.5, 221.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 236.5, 221.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 243.5, 222.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 243.5, 222.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 244.5, 222.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 244.5, 222.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 246.5, 223.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 246.5, 223.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 253.5, 224.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 253.5, 224.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 271.5, 225.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 271.5, 225.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 280.5, 226.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 280.5, 226.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 296.5, 228.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 296.5, 228.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 305.5, 229.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 305.5, 229.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 307.5, 229.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 307.5, 229.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 313.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 313.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 314.5, 231.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 314.5, 231.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 316.5, 231.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 316.5, 231.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 317.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 317.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 318.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 318.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 319.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 319.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 320.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 320.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 321.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 321.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 322.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 322.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 323.5, 232.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 323.5, 232.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 324.5, 231.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 324.5, 231.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 325.5, 231.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 325.5, 231.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 325.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 325.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 324.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 324.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 323.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 323.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 322.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 322.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 321.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 321.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 320.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 320.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 319.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 319.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 318.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 318.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 316.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 316.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 315.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 315.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 312.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 312.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 311.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 311.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 310.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 310.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 309.5, 230.5
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1, Coords: 309.5, 230.5
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1, Coordonnées: 309.5, 230.5
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🏁 [DEBUG] Fin du dessin, mode: draw
+ 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+ ✅ [DEBUG] Application curseur: draw-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at CanvasManager.createLine (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/canvas.js:716:47)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: draw
+ 💾 État sauvegardé - Pile undo: 4 états
+   [0] 0 objets
+   [1] 1 objets
+   [2] 3 objets
+   [3] 5 objets
+   Pile redo: 0 états
+ 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 4 undoCount: 3 redoCount: 0
+ 🔄 Historique: 3 undo (activé), 0 redo (désactivé)
+ ✅ [DEBUG] Fin du dessin terminée
+ 🔍 [ZOOM DEBUG] EVENTS SANS CORRECTION - Zoom: 1.25, Coords: 920, 818
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 237.60000000000002, 656
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🏁 [DEBUG] Fin du dessin, mode: draw
+ 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+ ✅ [DEBUG] Application curseur: draw-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at CanvasManager.createLine (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/canvas.js:716:47)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: draw
+ 💾 État sauvegardé - Pile undo: 5 états
+   [0] 0 objets
+   [1] 1 objets
+   [2] 3 objets
+   [3] 5 objets
+   [4] 6 objets
+   Pile redo: 0 états
+ 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 5 undoCount: 4 redoCount: 0
+ 🔄 Historique: 4 undo (activé), 0 redo (désactivé)
+ ✅ [DEBUG] Fin du dessin terminée
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 187.20000000000002, 139.20000000000002
+ 🖱️ [DEBUG] Mouse down - Mode: draw, Target: none
+ 🖱️ [DEBUG] Démarrage du dessin
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] EVENTS SANS CORRECTION - Zoom: 1.25, Coords: 234, 174
+ 🎯 [DEBUG] Début du dessin, mode: draw
+ 🔄 Changement d'état curseur: drawing
+ ✅ [DEBUG] Guide créé pour mode: draw
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 187.20000000000002, 140.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 234, 176
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 187.20000000000002, 141.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 234, 177
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 187.20000000000002, 144.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 234, 181
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 156.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 196
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 181.60000000000002, 165.60000000000002
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 227, 207
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 178.4, 188
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 223, 235
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 176.8, 210.4
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 221, 263
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 176.8, 216.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 221, 271
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 176.8, 228.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 221, 286
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 178.4, 237.60000000000002
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 223, 297
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 183.20000000000002, 250.4
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 229, 313
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 186.4, 258.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 233, 323
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 186.4, 259.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 233, 324
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 186.4, 260
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 233, 325
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 186.4, 260.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 233, 326
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 185.60000000000002, 261.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 232, 327
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 185.60000000000002, 262.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 232, 328
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184.8, 263.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 231, 329
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 264.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 331
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 265.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 332
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 267.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 334
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 268
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 335
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 268.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 336
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 270.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 338
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 271.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 339
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 272.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 341
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 274.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 343
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 276
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 345
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 276.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 346
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 277.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 347
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 278.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 348
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 279.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 349
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 280.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 351
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 281.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 352
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 282.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 353
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 284
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 355
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 285.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 357
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 287.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 359
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 290.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 363
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 291.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 364
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 292
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 365
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 292.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 366
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 293.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 367
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 294.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 368
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 295.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 369
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 296.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 371
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 298.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 373
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 299.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 374
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 300
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 375
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 300.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 376
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 301.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 377
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 302.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 378
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 303.2
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 379
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 304
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 380
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 304.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 381
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 305.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 382
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 306.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 383
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 307.20000000000005
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 384
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 308
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 385
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 308.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 386
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 309.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 387
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 310.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 388
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 311.20000000000005
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 389
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 312
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 390
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 312.8
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 391
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 184, 313.6
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 230, 392
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 183.20000000000002, 314.40000000000003
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 229, 393
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 183.20000000000002, 315.20000000000005
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 229, 394
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 183.20000000000002, 316
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 229, 395
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 182.4, 316
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 228, 395
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 181.60000000000002, 316
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 227, 395
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 182.4, 316
+ 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 228, 395
+ 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 182.4, 316
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+ 🏁 [DEBUG] Fin du dessin, mode: draw
+ 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+ ✅ [DEBUG] Application curseur: draw-cursor
+ 🚫 [DEBUG] Curseurs Fabric.js désactivés
+ 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+ 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+ 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at CanvasManager.createLine (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/canvas.js:716:47)
+ 🔍 [UNDO DEBUG] isDrawing: false
+ 🔍 [UNDO DEBUG] currentMode: draw
+ 💾 État sauvegardé - Pile undo: 6 états
+   [0] 0 objets
+   [1] 1 objets
+   [2] 3 objets
+   [3] 5 objets
+   [4] 6 objets
+layers.js:102   [5] 8 objets
+layers.js:104   Pile redo: 0 états
+layers.js:413 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 6 undoCount: 5 redoCount: 0
+ui.js:552 🔄 Historique: 5 undo (activé), 0 redo (désactivé)
+canvas.js:684 ✅ [DEBUG] Fin du dessin terminée
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 88.80000000000001, 225.60000000000002
+canvas.js:386 🖱️ [DEBUG] Mouse down - Mode: draw, Target: none
+canvas.js:433 🖱️ [DEBUG] Démarrage du dessin
+canvas.js:486 🎯 [DEBUG] Début du dessin, mode: draw
+events.js:404 🔄 Changement d'état curseur: drawing
+canvas.js:569 ✅ [DEBUG] Guide créé pour mode: draw
+events.js:784 🔍 [ZOOM DEBUG] EVENTS SANS CORRECTION - Zoom: 1.25, Coords: 111, 282
+canvas.js:486 🎯 [DEBUG] Début du dessin, mode: draw
+events.js:404 🔄 Changement d'état curseur: drawing
+canvas.js:569 ✅ [DEBUG] Guide créé pour mode: draw
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 88.80000000000001, 224
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 111, 280
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 88.80000000000001, 223.20000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 111, 279
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 91.2, 222.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 114, 278
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 98.4, 221.60000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 123, 277
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 120.80000000000001, 218.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 151, 273
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 160, 214.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 200, 268
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 180, 212.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 225, 266
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 216, 212
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 270, 265
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 224, 212
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 280, 265
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 239.20000000000002, 212
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 299, 265
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 246.4, 212.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 308, 266
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 247.20000000000002, 212.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 309, 266
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 248, 212.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 310, 266
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 249.60000000000002, 214.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 312, 268
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 253.60000000000002, 215.20000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 317, 269
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 263.2, 220
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 329, 275
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 276, 224.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 345, 281
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 281.6, 225.60000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 352, 282
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 288, 226.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 360, 283
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 289.6, 227.20000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 362, 284
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 294.40000000000003, 228
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 368, 285
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 296.8, 228
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 371, 285
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 297.6, 228
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 372, 285
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 298.40000000000003, 228
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 373, 285
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 299.2, 228
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 374, 285
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 300, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 375, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 300.8, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 376, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 301.6, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 377, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 302.40000000000003, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 378, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 303.2, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 379, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 304, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 380, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 304.8, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 381, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 305.6, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 382, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 306.40000000000003, 228.8
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 383, 286
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 307.20000000000005, 229.60000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 384, 287
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 307.20000000000005, 230.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 384, 288
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 307.20000000000005, 231.20000000000002
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 384, 289
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 307.20000000000005, 230.4
+events.js:822 🔍 [ZOOM DEBUG] MOVE SANS CORRECTION - Zoom: 1.25, Coords: 384, 288
+canvas.js:16 🔍 [ZOOM DEBUG] SANS CORRECTION - Zoom: 1.25, Coordonnées: 307.20000000000005, 230.4
+canvas.js:1498 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+canvas.js:1498 🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle
+canvas.js:606 🏁 [DEBUG] Fin du dessin, mode: draw
+tools.js:331 🎯 [DEBUG] Mise à jour curseur pour mode: draw
+tools.js:431 ✅ [DEBUG] Application curseur: draw-cursor
+tools.js:489 🚫 [DEBUG] Curseurs Fabric.js désactivés
+tools.js:444 📋 [DEBUG] Classes CSS appliquées: draw-cursor
+layers.js:63 🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══
+layers.js:64 🔍 [UNDO DEBUG] Stack: at UndoRedoManager.performSave (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:62:23) → at UndoRedoManager.saveState (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/layers.js:52:14) → at CanvasManager.createLine (file:///C:/Users/dider/Desktop/Francis_by_Claude/modules/canvas.js:716:47)
+layers.js:65 🔍 [UNDO DEBUG] isDrawing: false
+layers.js:66 🔍 [UNDO DEBUG] currentMode: draw
+layers.js:100 💾 État sauvegardé - Pile undo: 7 états
+layers.js:102   [0] 0 objets
+layers.js:102   [1] 1 objets
+layers.js:102   [2] 3 objets
+layers.js:102   [3] 5 objets
+layers.js:102   [4] 6 objets
+layers.js:102   [5] 8 objets
+layers.js:102   [6] 10 objets
+layers.js:104   Pile redo: 0 états
+layers.js:413 📊 [UNDO DEBUG] getHistoryInfo: Calque de dessin undoStack.length: 7 undoCount: 6 redoCount: 0
+ui.js:552 🔄 Historique: 6 undo (activé), 0 redo (désactivé)
+canvas.js:684 ✅ [DEBUG] Fin du dessin terminée

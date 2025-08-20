@@ -60,7 +60,7 @@
 
             // Constantes
             this.DRAWING_LAYER_NAME = "Calque de dessin";
-            this.GEOPORTAIL_URL = "https://geoportail.wallonie.be/walonmap#BBOX=221122.07131648462,263085.07190915244,128620.7329699423,147168.0617312665";
+            this.GEOPORTAIL_URL = "https://geoportail.wallonie.be/walonmap#SHARE=393E6849BD620D95E0630CB6A49D065D";
             
             // Données des panneaux (chargées depuis fichier externe)
             this.signsData = [];

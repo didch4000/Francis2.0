@@ -124,7 +124,7 @@
             
             switch (state) {
                 case 'start':
-                    guideMessage.innerHTML = '<h2>Commencez par ajouter une image</h2><p>Utilisez le bouton 🖼️ dans la barre des calques en bas.</p>';
+                    guideMessage.innerHTML = '<h2>Bienvenue dans l\'éditeur de plans</h2><p><strong>1.</strong> Commencez par lire les <strong>Instructions de départ</strong> en cliquant sur le bouton en haut à droite.</p><p><strong>2.</strong> Ensuite, ajoutez une image de fond en utilisant le bouton 🖼️ dans la barre des calques en bas.</p>';
                     guideMessage.style.display = 'block';
                     break;
                 case 'image_loaded':
@@ -150,8 +150,8 @@
             const isDrawingLayerActive = activeLayer && activeLayer.name === this.state.DRAWING_LAYER_NAME;
             const drawingLayerExists = this.state.layers.some(l => l.name === this.state.DRAWING_LAYER_NAME);
 
-            // Désactiver tous les groupes d'outils par défaut
-            document.querySelectorAll('.tool-group').forEach(group => group.classList.add('disabled'));
+            // Désactiver tous les groupes d'outils par défaut, sauf le groupe instructions
+            document.querySelectorAll('.tool-group:not(.instructions-group)').forEach(group => group.classList.add('disabled'));
             document.getElementById('zoom-tools').classList.remove('disabled');
             
             // Gérer le verrouillage des boutons de zoom
@@ -235,8 +235,8 @@
         }
 
         disableAllToolsAndGroupsExcept(exceptions) {
-            // Désactiver tous les groupes d'outils
-            document.querySelectorAll('.tool-group').forEach(group => {
+            // Désactiver tous les groupes d'outils, sauf le groupe instructions
+            document.querySelectorAll('.tool-group:not(.instructions-group)').forEach(group => {
                 group.classList.add('disabled');
             });
             

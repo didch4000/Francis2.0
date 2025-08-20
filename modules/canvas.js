@@ -280,17 +280,21 @@
                 const obj = e.target;
                 // Ne pas sauvegarder automatiquement pour les points de contrôle de courbe ET les courbes liées
                 if (obj.isControlPoint) {
-                    console.log('🎯 [CURVE DEBUG] Modification point de contrôle - pas de sauvegarde automatique');
-                    this.handleObjectModified(canvas, e, null); // Pas de sauvegarde
+                    console.log('🎯 [CURVE DEBUG] Modification point de contrôle - finalisation de la courbe');
+                    this.handleObjectModified(canvas, e, null); // Supprime le point de contrôle
                     
-                    // Sauvegarder seulement quand on finit de déplacer le point de contrôle
+                    // Sauvegarder APRÈS que le point de contrôle soit supprimé
                     setTimeout(() => {
-                        if (!obj.isBeingDragged && !this.state.isCreatingCurve && !this.state.isModifyingControlPoint) {
-                            console.log('🎯 [CURVE DEBUG] Sauvegarde finale après modification point de contrôle');
+                        if (!this.state.isCreatingCurve) {
+                            console.log('🎯 [CURVE DEBUG] Sauvegarde finale après suppression point de contrôle');
                             const layer = this.state.layers.find(l => l.fabricCanvas === canvas);
-                            this.layerManager.undoRedoManager.saveState(canvas, layer);
+                            if (layer && this.layerManager.undoRedoManager) {
+                                this.layerManager.undoRedoManager.saveState(canvas, layer);
+                                // Nettoyer le flag de courbe en attente
+                                this.state.hasPendingCurveSave = false;
+                            }
                         }
-                    }, 100);
+                    }, 50); // Délai plus court pour éviter les problèmes de timing
                 } else if (obj.type === 'path' && obj.controlHandle) {
                     console.log('🎯 [CURVE DEBUG] Modification courbe liée - pas de sauvegarde automatique');
                     this.handleObjectModified(canvas, e, null); // Pas de sauvegarde pour les courbes
@@ -307,18 +311,8 @@
                 if (obj.isControlPoint) {
                     obj.isBeingDragged = false;
                     this.state.isModifyingControlPoint = false;
-                    console.log('🎯 [CONTROL POINT DEBUG] Fin modification point de contrôle');
-                    
-                    // ✅ NOUVEAU : Vérifier s'il y a une courbe en attente de sauvegarde
-                    if (this.state.hasPendingCurveSave) {
-                        console.log('🎯 [CURVE DEBUG] Sauvegarde courbe finale après ajustement point de contrôle');
-                        const layer = this.state.layers.find(l => l.fabricCanvas === canvas);
-                        if (layer && this.layerManager.undoRedoManager) {
-                            this.layerManager.undoRedoManager.forceSave(canvas, layer);
-                            this.state.hasPendingCurveSave = false;
-                            console.log('✅ [CURVE DEBUG] Courbe sauvegardée avec état final');
-                        }
-                    }
+                    console.log('🎯 [CONTROL POINT DEBUG] Fin modification point de contrôle - sauvegarde gérée par object:modified');
+                    // Ne pas sauvegarder ici car c'est géré par object:modified pour éviter les doublons
                 }
                 
                 console.log(`🔄 object:moved détecté - Type: ${obj.type}, isVehicle: ${!!obj.isVehicle}, isProjectionElement: ${!!obj.isProjectionElement}, projectionRole: ${obj.projectionRole || 'none'}`);

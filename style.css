@@ -214,6 +214,35 @@ html body div.toolbar div.permanent-tools#project-tools button#btn-save-project:
     pointer-events: none;
 }
 
+/* Le groupe instructions-group et son bouton doivent toujours être actifs */
+.instructions-group,
+.instructions-group *,
+.instructions-group button {
+    opacity: 1 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+#btn-instructions {
+    background: #3c3c3c !important;
+    border: 1px solid #555 !important;
+    color: #eee !important;
+}
+
+#btn-instructions:hover {
+    background: #4a4a4a !important;
+    border-color: #666 !important;
+}
+
+/* S'assurer que le groupe instructions ne soit jamais considéré comme disabled */
+.instructions-group.disabled,
+.instructions-group.disabled *,
+.instructions-group.disabled button {
+    opacity: 1 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
 
 /* Zone de dessin (Centre) */
 #canvas-container {

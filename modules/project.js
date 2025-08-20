@@ -464,7 +464,7 @@
             // Remettre le message de guidage initial et effacer tout contenu d'étape
             const guideMessage = document.getElementById('guide-message');
             if (guideMessage) {
-                guideMessage.innerHTML = '<h2>Commencez par ajouter une image</h2><p>Utilisez le bouton 🖼️ dans la barre des calques en bas.</p>';
+                guideMessage.innerHTML = '<h2>Bienvenue dans l\'éditeur de plans</h2><p><strong>1.</strong> Commencez par lire les <strong>Instructions de départ</strong> en cliquant sur le bouton en haut à droite.</p><p><strong>2.</strong> Ensuite, ajoutez une image de fond en utilisant le bouton 🖼️ dans la barre des calques en bas.</p>';
                 guideMessage.style.display = 'block';
             }
             

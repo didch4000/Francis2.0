@@ -70,6 +70,10 @@
 
 
             // Boutons d'export
+            document.getElementById('btn-instructions').addEventListener('click', () => {
+                this.openInstructionsFile();
+            });
+
             document.getElementById('btn-export-png').addEventListener('click', () => {
                 this.exportManager.exportToPNG();
             });
@@ -1733,6 +1737,16 @@ handleLoadingStateChange(isLoading) {
             } catch (error) {
                 console.error('❌ Erreur lors de la création du nouveau projet:', error);
                 alert('Erreur lors de la création du nouveau projet: ' + error.message);
+            }
+        }
+
+        openInstructionsFile() {
+            try {
+                // Ouvrir le fichier instructions dans une nouvelle fenêtre
+                window.open('instruction départ.txt', '_blank');
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'ouverture du fichier instructions:', error);
+                alert('Impossible d\'ouvrir le fichier instructions: ' + error.message);
             }
         }
     }

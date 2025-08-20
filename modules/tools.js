@@ -862,7 +862,7 @@ debugCursor() {
             const tickMark = new fabric.Line([0, -5, 0, 5], { stroke: 'red', strokeWidth: 2 });
             const zeroText = new fabric.Text('0', {
                 left: 0, top: 0, originX: 'center', originY: 'center',
-                fontSize: 16, fill: 'red', backgroundColor: 'rgba(42, 42, 42, 0.7)',
+                fontSize: 16, fill: 'red', backgroundColor: 'rgba(42, 42, 42, 1.0)',
                 textBaseline: 'middle' // Corriger explicitement la baseline
             });
             const zeroPointGroup = new fabric.Group([tickMark, zeroText], {
@@ -1070,7 +1070,7 @@ debugCursor() {
                 top: (start.y + end.y) / 2 - 15,
                 fontSize: 12,
                 fill: 'black',
-                backgroundColor: 'rgba(255,255,255,0.7)',
+                backgroundColor: 'rgba(255,255,255,1.0)',
                 selectable: true,
                 evented: true,
                 isMeasurement: true,
@@ -1764,7 +1764,7 @@ debugCursor() {
             const commonProps = { stroke: color, strokeWidth: thickness, originX: 'left', originY: 'top' };
             const vehicleId = 'vehicle_' + Date.now();
 
-            const vehicleBody = new fabric.Rect({ width: lengthPx, height: widthPx, fill: 'transparent', ...commonProps });
+            const vehicleBody = new fabric.Rect({ width: lengthPx, height: widthPx, fill: 'rgba(255,255,255,1.0)', ...commonProps });
             const windshield = new fabric.Line([lengthPx * (2/3), 0, lengthPx * (2/3), widthPx], commonProps);
             const frontLeft = new fabric.Line([lengthPx * (2/3), 0, lengthPx, widthPx/2], commonProps);
             const frontRight = new fabric.Line([lengthPx * (2/3), widthPx, lengthPx, widthPx/2], commonProps);
@@ -1772,6 +1772,7 @@ debugCursor() {
             const letterText = new fabric.Text(letter, {
                 fontSize: widthPx * 0.5,
                 fill: color,
+                backgroundColor: 'rgba(255,255,255,1.0)',
                 left: lengthPx * 0.15,
                 top: widthPx / 2,
                 originX: 'center',
