@@ -475,6 +475,7 @@
                 locked: false,
                 scaleDenominator: options.scaleDenominator || null,
                 pixelRatio: options.pixelRatio || 1,
+                backgroundImage: image ? image.src : null, // Sauvegarder la source de l'image de fond
                 undoStack: [],
                 redoStack: []
             };

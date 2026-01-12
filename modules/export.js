@@ -16,13 +16,110 @@
             }
 
             // Forcer le rendu de tous les calques avant l'exportation
-            this.state.layers.forEach(l => l.fabricCanvas.renderAll());
+            this.state.layers.forEach(l => {
+                l.fabricCanvas.calcOffset(); // Recalculer les offsets pour assurer un rendu correct
+                l.fabricCanvas.renderAll();
+            });
 
-            const firstLayer = this.state.layers[this.state.layers.length - 1];
+            // Stratégie de détermination des dimensions de l'export :
+            // 1. "Plan rogné" : C'est la référence absolue de la zone de travail si elle existe.
+            // On utilise une recherche souple pour éviter les problèmes d'encodage (é)
+            let referenceLayer = this.state.layers.find(l => l.name && (l.name === "Plan rogné" || l.name.indexOf('rogn') !== -1));
+
+            // 2. "Calque de dessin" : Si pas de plan rogné, on utilise le calque de dessin.
+            if (!referenceLayer) {
+                referenceLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
+            }
+
+            // 3. Fallback : Le premier calque de la liste (Top Layer).
+            if (!referenceLayer && this.state.layers.length > 0) {
+                referenceLayer = this.state.layers[0];
+            }
+
+            // 4. Dernier recours
+            if (!referenceLayer) {
+                referenceLayer = this.state.layers[this.state.layers.length - 1];
+            }
+
+            console.log(`🖨️ [EXPORT] Dimensions basées sur le calque : "${referenceLayer ? referenceLayer.name : 'Aucun'}" (${referenceLayer ? referenceLayer.fabricCanvas.width : 0}x${referenceLayer ? referenceLayer.fabricCanvas.height : 0})`);
+
+            if (referenceLayer) {
+                // Vérification de cohérence : si les dimensions semblent aberrantes (> 4000px) alors que c'est un plan rogné,
+                // il y a peut-être un problème de restauration.
+                if (referenceLayer.fabricCanvas.width > 4000 && referenceLayer.name && referenceLayer.name.indexOf('rogn') !== -1) {
+                     console.warn('⚠️ [EXPORT] Attention : Le plan rogné semble très grand. Vérifiez que le rognage a bien été appliqué.');
+                }
+            }
+
+            // Calculer les dimensions finales
+            let exportWidth = referenceLayer ? referenceLayer.fabricCanvas.width : 800;
+            let exportHeight = referenceLayer ? referenceLayer.fabricCanvas.height : 600;
+
+            // Si le calque de référence a une image de fond, on peut aussi vérifier ses dimensions naturelles
+            if (referenceLayer && referenceLayer.fabricCanvas.backgroundImage) {
+                const bgImage = referenceLayer.fabricCanvas.backgroundImage;
+                const bgScaledWidth = bgImage.width * bgImage.scaleX;
+                const bgScaledHeight = bgImage.height * bgImage.scaleY;
+                
+                if (exportWidth > bgScaledWidth + 5 && exportWidth > 2000) {
+                    console.log(`🖨️ [EXPORT] Correction des dimensions basée sur l'image de fond: ${bgScaledWidth}x${bgScaledHeight} (Canvas: ${exportWidth}x${exportHeight})`);
+                    exportWidth = Math.floor(bgScaledWidth);
+                    exportHeight = Math.floor(bgScaledHeight);
+                }
+            }
+
+            // Stratégie de secours ultime : Si le canvas reste immense (> 2000px), 
+            // on regarde si le contenu du dessin est localisé et on rogne dessus.
+            let contentBounds = null;
+            if (exportWidth > 2000) {
+                const drawingLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
+                if (drawingLayer && drawingLayer.fabricCanvas.getObjects().length > 0) {
+                    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                    let hasVisibleObjects = false;
+
+                    drawingLayer.fabricCanvas.getObjects().forEach(obj => {
+                        if (!obj.visible) return;
+                        // getBoundingRect retourne les coordonnées absolues sur le canvas
+                        const rect = obj.getBoundingRect();
+                        if (rect.left < minX) minX = rect.left;
+                        if (rect.top < minY) minY = rect.top;
+                        if (rect.left + rect.width > maxX) maxX = rect.left + rect.width;
+                        if (rect.top + rect.height > maxY) maxY = rect.top + rect.height;
+                        hasVisibleObjects = true;
+                    });
+
+                    if (hasVisibleObjects) {
+                        // Ajouter une marge confortable
+                        const margin = 100;
+                        minX = Math.max(0, minX - margin);
+                        minY = Math.max(0, minY - margin);
+                        // On ne dépasse pas les dimensions originales
+                        maxX = Math.min(exportWidth, maxX + margin);
+                        maxY = Math.min(exportHeight, maxY + margin);
+                        
+                        const boundsWidth = maxX - minX;
+                        const boundsHeight = maxY - minY;
+
+                        // Si la zone de dessin est significativement plus petite que le canvas géant (< 80%)
+                        if (boundsWidth < exportWidth * 0.8) {
+                            console.log(`✂️ [EXPORT] Rognage automatique sur le contenu du dessin: ${boundsWidth}x${boundsHeight} à (${minX},${minY})`);
+                            exportWidth = Math.floor(boundsWidth);
+                            exportHeight = Math.floor(boundsHeight);
+                            contentBounds = { x: minX, y: minY };
+                        }
+                    }
+                }
+            }
+
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = firstLayer.fabricCanvas.width;
-            tempCanvas.height = firstLayer.fabricCanvas.height;
+            tempCanvas.width = exportWidth;
+            tempCanvas.height = exportHeight;
             const tempCtx = tempCanvas.getContext('2d');
+
+            // Appliquer le décalage si on a rogné sur le contenu
+            if (contentBounds) {
+                tempCtx.translate(-contentBounds.x, -contentBounds.y);
+            }
 
             // Dessiner les calques du bas vers le haut, de manière asynchrone
             for (const layer of [...this.state.layers].reverse()) {
@@ -77,17 +174,102 @@
             }
 
             // Forcer le rendu de tous les calques avant l'exportation
-            this.state.layers.forEach(l => l.fabricCanvas.renderAll());
+            this.state.layers.forEach(l => {
+                l.fabricCanvas.calcOffset();
+                l.fabricCanvas.renderAll();
+            });
 
-            const firstLayer = this.state.layers[this.state.layers.length - 1];
+            // --- REUTILISATION DE LA LOGIQUE ROBUSTE DE DETERMINATION DES DIMENSIONS (COPIÉ DE EXPORTTOPNG) ---
+
+            // 1. "Plan rogné" : C'est la référence absolue de la zone de travail si elle existe.
+            let referenceLayer = this.state.layers.find(l => l.name && (l.name === "Plan rogné" || l.name.indexOf('rogn') !== -1));
+
+            // 2. "Calque de dessin" : Si pas de plan rogné, on utilise le calque de dessin.
+            if (!referenceLayer) {
+                referenceLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
+            }
+
+            // 3. Fallback : Le premier calque de la liste (Top Layer).
+            if (!referenceLayer && this.state.layers.length > 0) {
+                referenceLayer = this.state.layers[0];
+            }
+
+            // 4. Dernier recours
+            if (!referenceLayer) {
+                referenceLayer = this.state.layers[this.state.layers.length - 1];
+            }
+
+            console.log(`🖨️ [EXPORT PDF] Dimensions basées sur le calque : "${referenceLayer ? referenceLayer.name : 'Aucun'}" (${referenceLayer ? referenceLayer.fabricCanvas.width : 0}x${referenceLayer ? referenceLayer.fabricCanvas.height : 0})`);
+
+            // Calculer les dimensions finales
+            let exportWidth = referenceLayer ? referenceLayer.fabricCanvas.width : 800;
+            let exportHeight = referenceLayer ? referenceLayer.fabricCanvas.height : 600;
+
+            // Si le calque de référence a une image de fond, on peut aussi vérifier ses dimensions naturelles
+            if (referenceLayer && referenceLayer.fabricCanvas.backgroundImage) {
+                const bgImage = referenceLayer.fabricCanvas.backgroundImage;
+                const bgScaledWidth = bgImage.width * bgImage.scaleX;
+                const bgScaledHeight = bgImage.height * bgImage.scaleY;
+                
+                if (exportWidth > bgScaledWidth + 5 && exportWidth > 2000) {
+                    console.log(`🖨️ [EXPORT PDF] Correction des dimensions basée sur l'image de fond: ${bgScaledWidth}x${bgScaledHeight} (Canvas: ${exportWidth}x${exportHeight})`);
+                    exportWidth = Math.floor(bgScaledWidth);
+                    exportHeight = Math.floor(bgScaledHeight);
+                }
+            }
+
+            // Stratégie de secours ultime : Si le canvas reste immense (> 2000px), 
+            // on regarde si le contenu du dessin est localisé et on rogne dessus.
+            let contentBounds = null;
+            if (exportWidth > 2000) {
+                const drawingLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
+                if (drawingLayer && drawingLayer.fabricCanvas.getObjects().length > 0) {
+                    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                    let hasVisibleObjects = false;
+
+                    drawingLayer.fabricCanvas.getObjects().forEach(obj => {
+                        if (!obj.visible) return;
+                        const rect = obj.getBoundingRect();
+                        if (rect.left < minX) minX = rect.left;
+                        if (rect.top < minY) minY = rect.top;
+                        if (rect.left + rect.width > maxX) maxX = rect.left + rect.width;
+                        if (rect.top + rect.height > maxY) maxY = rect.top + rect.height;
+                        hasVisibleObjects = true;
+                    });
+
+                    if (hasVisibleObjects) {
+                        const margin = 100;
+                        minX = Math.max(0, minX - margin);
+                        minY = Math.max(0, minY - margin);
+                        maxX = Math.min(exportWidth, maxX + margin);
+                        maxY = Math.min(exportHeight, maxY + margin);
+                        
+                        const boundsWidth = maxX - minX;
+                        const boundsHeight = maxY - minY;
+
+                        if (boundsWidth < exportWidth * 0.8) {
+                            console.log(`✂️ [EXPORT PDF] Rognage automatique sur le contenu du dessin: ${boundsWidth}x${boundsHeight} à (${minX},${minY})`);
+                            exportWidth = Math.floor(boundsWidth);
+                            exportHeight = Math.floor(boundsHeight);
+                            contentBounds = { x: minX, y: minY };
+                        }
+                    }
+                }
+            }
+
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = firstLayer.fabricCanvas.width;
-            tempCanvas.height = firstLayer.fabricCanvas.height;
+            tempCanvas.width = exportWidth;
+            tempCanvas.height = exportHeight;
             const tempCtx = tempCanvas.getContext('2d');
 
             // Fond blanc
             tempCtx.fillStyle = 'white';
             tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            // Appliquer le décalage si on a rogné sur le contenu
+            if (contentBounds) {
+                tempCtx.translate(-contentBounds.x, -contentBounds.y);
+            }
 
             // Rendu des calques
             for (const layer of [...this.state.layers].reverse()) {

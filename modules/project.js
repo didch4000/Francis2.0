@@ -171,25 +171,37 @@
         // Restaurer un calque individuel
         async restoreLayer(layerData, layerType = 'unknown') {
             return new Promise((resolve) => {
+                // Préparer les options de dimensions pour la création
+                const creationOptions = {
+                    width: layerData.width,
+                    height: layerData.height,
+                    x: layerData.x,
+                    y: layerData.y,
+                    angle: layerData.angle,
+                    scaleDenominator: layerData.scaleDenominator,
+                    pixelRatio: layerData.pixelRatio
+                };
+
                 if (layerData.backgroundImage) {
                     // Calque avec image de fond
                     const img = new Image();
                     img.onload = () => {
                         // Déterminer les options d'insertion selon le type de calque
-                        let insertOptions = {};
+                        let insertOptions = { ...creationOptions };
                         if (layerType === 'background') {
-                            insertOptions = { insertBelowDrawing: true }; // Calques de fond en bas
+                            insertOptions.insertBelowDrawing = true; // Calques de fond en bas
                         } else if (layerType === 'supplementary') {
-                            insertOptions = { insertBelowDrawing: true }; // Calques supplémentaires au milieu (mais après les fonds)
+                            insertOptions.insertBelowDrawing = true; // Calques supplémentaires au milieu (mais après les fonds)
                         } else {
-                            insertOptions = { insertBelowDrawing: false }; // Calques de dessin au-dessus
+                            insertOptions.insertBelowDrawing = false; // Calques de dessin au-dessus
                         }
                         
                         const layer = this.layerManager.createLayer(layerData.name, img, insertOptions);
                         this.applyLayerProperties(layer, layerData);
-                        this.restoreCanvasObjects(layer, layerData.canvasState);
-                        console.log(`🎨 [LAYER ORDER] ${layerType} restauré: ${layerData.name}`);
-                        resolve();
+                        this.restoreCanvasObjects(layer, layerData.canvasState).then(() => {
+                            console.log(`🎨 [LAYER ORDER] ${layerType} restauré: ${layerData.name}`);
+                            resolve();
+                        });
                     };
                     img.onerror = () => {
                         console.warn('❌ Impossible de charger l\'image du calque:', layerData.name);
@@ -198,20 +210,21 @@
                     img.src = layerData.backgroundImage;
                 } else {
                     // Calque sans image de fond
-                    let insertOptions = {};
+                    let insertOptions = { ...creationOptions };
                     if (layerType === 'background') {
-                        insertOptions = { insertBelowDrawing: true }; // Calques de fond en bas
+                        insertOptions.insertBelowDrawing = true; // Calques de fond en bas
                     } else if (layerType === 'supplementary') {
-                        insertOptions = { insertBelowDrawing: true }; // Calques supplémentaires au milieu (mais après les fonds)
+                        insertOptions.insertBelowDrawing = true; // Calques supplémentaires au milieu (mais après les fonds)
                     } else {
-                        insertOptions = { insertBelowDrawing: false }; // Calques de dessin au-dessus
+                        insertOptions.insertBelowDrawing = false; // Calques de dessin au-dessus
                     }
                     
                     const layer = this.layerManager.createLayer(layerData.name, null, insertOptions);
                     this.applyLayerProperties(layer, layerData);
-                    this.restoreCanvasObjects(layer, layerData.canvasState);
-                    console.log(`🎨 [LAYER ORDER] ${layerType} restauré: ${layerData.name}`);
-                    resolve();
+                    this.restoreCanvasObjects(layer, layerData.canvasState).then(() => {
+                        console.log(`🎨 [LAYER ORDER] ${layerType} restauré: ${layerData.name}`);
+                        resolve();
+                    });
                 }
             });
         }
@@ -222,6 +235,11 @@
             layer.visible = layerData.visible !== false;
             layer.opacity = layerData.opacity !== undefined ? layerData.opacity : 1;
             
+            // Appliquer l'opacité visuellement
+            if (layer.wrapper) {
+                layer.wrapper.style.opacity = layer.opacity;
+            }
+
             // Restaurer les dimensions si elles existent
             if (layerData.width && layerData.height) {
                 layer.fabricCanvas.setDimensions({
@@ -271,11 +289,14 @@
 
         // Restaurer les objets d'un canvas
         restoreCanvasObjects(layer, canvasState) {
-            if (!canvasState || !layer.fabricCanvas) return;
+            if (!canvasState || !layer.fabricCanvas) return Promise.resolve();
             
-            layer.fabricCanvas.loadFromJSON(canvasState, () => {
-                layer.fabricCanvas.renderAll();
-                console.log(`📦 Objets restaurés pour le calque: ${layer.name}`);
+            return new Promise((resolve) => {
+                layer.fabricCanvas.loadFromJSON(canvasState, () => {
+                    layer.fabricCanvas.renderAll();
+                    console.log(`📦 Objets restaurés pour le calque: ${layer.name}`);
+                    resolve();
+                });
             });
         }
 
