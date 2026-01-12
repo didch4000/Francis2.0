@@ -1041,6 +1041,11 @@ handleLoadingStateChange(isLoading) {
                     this.layerManager.createLayer("Image de fond", img);
                     this.state.setWorkflowState('image_loaded');
                     this.toolsManager.setMode('layer-move');
+                    
+                    // Proposer le choix de l'échelle (manuel ou preset)
+                    if (this.uiManager) {
+                        this.uiManager.showScaleChoiceModal();
+                    }
                 } else {
                     this.handleSubsequentLayerImage(img);
                 }
@@ -1071,11 +1076,45 @@ handleLoadingStateChange(isLoading) {
             const scaledWidth = fabricImage.getScaledWidth();
             const scaledHeight = fabricImage.getScaledHeight();
 
+            // Trouver l'angle du calque de fond existant pour l'appliquer au nouveau calque
+            // Cette logique s'applique aux images chargées par fichier ET par copier-coller
+            let initialAngle = 0;
+            
+            // Stratégie de recherche robuste du calque de fond :
+            // 1. Trier les calques par ID croissant (le fond est toujours le premier créé)
+            const sortedLayers = [...this.state.layers].sort((a, b) => {
+                const idA = parseInt(a.id) || 0;
+                const idB = parseInt(b.id) || 0;
+                return idA - idB;
+            });
+
+            // 2. Chercher dans l'ordre chronologique
+            let backgroundLayer = sortedLayers.find(l => l.name === 'Image de fond' || l.name === 'Plan rogné');
+            
+            // 3. Si non trouvé, prendre le tout premier calque qui a une image de fond (et n'est pas le dessin)
+            if (!backgroundLayer) {
+                backgroundLayer = sortedLayers.find(l => l.fabricCanvas && l.fabricCanvas.backgroundImage && l.name !== this.state.DRAWING_LAYER_NAME);
+            }
+
+            if (backgroundLayer) {
+                const currentAngle = parseFloat(backgroundLayer.angle) || 0;
+                // Si le plan a été rogné et redressé, on utilise l'angle original qui a servi au redressement
+                const originalRotation = parseFloat(backgroundLayer.originalRotation) || 0;
+                
+                // L'angle total est la somme de l'angle visuel actuel et de l'angle de redressement initial
+                initialAngle = currentAngle + originalRotation;
+                
+                console.log(`🎯 [LAYER] Angle récupéré du fond "${backgroundLayer.name}": ${initialAngle}° (Actuel: ${currentAngle}°, Original: ${originalRotation}°)`);
+            } else {
+                console.warn('⚠️ [LAYER] Aucun calque de fond trouvé pour récupérer l\'angle');
+            }
+
             this.layerManager.createLayer(`Image collée (1:${newLayerScale})`, fabricImage, { 
                 insertBelowDrawing: true,
                 width: scaledWidth,
                 height: scaledHeight,
-                scaleDenominator: newLayerScale
+                scaleDenominator: newLayerScale,
+                angle: initialAngle
             });
             
             this.layerManager.updateZIndexes();
@@ -1246,30 +1285,16 @@ handleLoadingStateChange(isLoading) {
             const landmarkXInput = document.getElementById('landmark-x-input');
             const landmarkYInput = document.getElementById('landmark-y-input');
 
-            // ✅ CORRECTION FINALE : Nettoyer les flags avant chaque ouverture
-            if (submitLandmarkBtn._landmarkListenerAdded) {
-                console.log('⚠️ Event listeners repères déjà présents - nettoyage forcé');
-                submitLandmarkBtn._landmarkListenerAdded = false;
-                btnCloseLandmarkModal._landmarkListenerAdded = false;
-            }
+            // ✅ CORRECTION : Utilisation de onclick pour éviter la duplication des événements
             
-            // Marquer que les event listeners sont ajoutés
-            submitLandmarkBtn._landmarkListenerAdded = true;
-            btnCloseLandmarkModal._landmarkListenerAdded = true;
-
-            const handleKeyDown = (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSubmit();
-                }
-            };
-
             const cleanup = () => {
                 document.getElementById('landmark-modal').style.display = 'none';
                 
-                // Nettoyer les flags pour permettre la prochaine ouverture
-                submitLandmarkBtn._landmarkListenerAdded = false;
-                btnCloseLandmarkModal._landmarkListenerAdded = false;
+                // Nettoyage des handlers
+                submitLandmarkBtn.onclick = null;
+                btnCloseLandmarkModal.onclick = null;
+                // Note: les listeners keydown restent, mais ce n'est pas critique car ils sont légers
+                // Idéalement on devrait aussi les nettoyer si on veut être parfait
             };
 
             const handleSubmit = () => {
@@ -1285,13 +1310,22 @@ handleLoadingStateChange(isLoading) {
                 cleanup();
             };
 
-            // Ajouter les event listeners sur les éléments originaux
-            submitLandmarkBtn.addEventListener('click', handleSubmit);
-            btnCloseLandmarkModal.addEventListener('click', cleanup);
-            landmarkXInput.addEventListener('keydown', handleKeyDown);
-            landmarkYInput.addEventListener('keydown', handleKeyDown);
+            // Gestionnaires via onclick pour éviter les doublons
+            submitLandmarkBtn.onclick = handleSubmit;
+            btnCloseLandmarkModal.onclick = cleanup;
             
-            // Gestion du clic à l'extérieur de la modal
+            // Pour les inputs, on utilise onkeydown pour éviter l'accumulation
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSubmit();
+                }
+            };
+            
+            landmarkXInput.onkeydown = handleKeyDown;
+            landmarkYInput.onkeydown = handleKeyDown;
+            
+            // Gestion du clic à l'extérieur
             const landmarkModal = document.getElementById('landmark-modal');
             const handleOutsideClick = (e) => {
                 if (e.target === landmarkModal) {
@@ -1306,26 +1340,16 @@ handleLoadingStateChange(isLoading) {
             const submitLegendBtn = document.getElementById('submit-legend-btn');
             const legendTextarea = document.getElementById('legend-textarea');
             
-            // ✅ CORRECTION FINALE : Nettoyer les flags avant chaque ouverture
-            if (submitLegendBtn._legendListenerAdded) {
-                console.log('⚠️ Event listeners légende déjà présents - nettoyage forcé');
-                submitLegendBtn._legendListenerAdded = false;
-            }
-            
-            // Marquer que l'event listener est ajouté
-            submitLegendBtn._legendListenerAdded = true;
-            
-            const handleSubmit = () => {
+            // ✅ CORRECTION : Utilisation de onclick pour écraser automatiquement les anciens handlers
+            // Cela évite la duplication des événements si l'utilisateur annule et recommence
+            submitLegendBtn.onclick = () => {
                 const legendText = legendTextarea.value;
                 this.uiManager.hideLegendModal();
                 this.exportManager.exportToPDF(title, legendText);
                 
-                // Nettoyer le flag pour permettre la prochaine ouverture
-                submitLegendBtn._legendListenerAdded = false;
+                // Nettoyage après exécution
+                submitLegendBtn.onclick = null;
             };
-            
-            // Ajouter l'event listener sur l'élément original
-            submitLegendBtn.addEventListener('click', handleSubmit);
         }
 
         // Utilitaires de zoom et défilement
@@ -1622,6 +1646,9 @@ handleLoadingStateChange(isLoading) {
             const selX_in_wrapper = boxRect.left - wrapperRect.left;
             const selY_in_wrapper = boxRect.top - wrapperRect.top;
 
+            // Capturer l'angle original avant la transformation
+            const originalAngle = baseLayer.angle || 0;
+
             tempCtx.translate(-selX_in_wrapper, -selY_in_wrapper);
             tempCtx.scale(oldZoom, oldZoom);
             tempCtx.translate(baseLayer.x, baseLayer.y);
@@ -1656,7 +1683,8 @@ handleLoadingStateChange(isLoading) {
 
                 // Créer le nouveau calque de base
                 this.layerManager.createLayer('Plan rogné', img, { 
-                    scaleDenominator: this.state.scaleInfo.userDefinedScaleDenominator 
+                    scaleDenominator: this.state.scaleInfo.userDefinedScaleDenominator,
+                    originalRotation: originalAngle
                 });
                 const newBaseLayer = this.state.getActiveLayer();
                 newBaseLayer.locked = true;

@@ -1089,7 +1089,7 @@ setupSelectionEvents(canvas) {
 
     const clearMeasurementSelectionStyle = (target) => {
         if (target && target.isProjectionElement && target.type === 'text') {
-            target.set({ backgroundColor: '' });
+            target.set({ backgroundColor: 'rgba(255,255,255,1.0)' });
         }
     };
 
@@ -1331,6 +1331,16 @@ setupSelectionEvents(canvas) {
         if (obj.isZeroPoint) {
             obj.isBeingMovedByUser = false;
         }
+        
+        // Si c'est un véhicule, on s'assure que le flag hasJustMoved est actif
+        // pour que update-all-projections sache qu'il faut réinitialiser les mesures
+        if (obj.isVehicle) {
+            obj.hasJustMoved = true;
+            setTimeout(() => {
+                obj.hasJustMoved = false;
+            }, 200);
+        }
+        
         document.dispatchEvent(new CustomEvent('update-all-projections'));
     }
     this.reorderObjectsOnCanvas(canvas);

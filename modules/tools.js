@@ -859,13 +859,15 @@ debugCursor() {
                 return this;
             };
 
-            const tickMark = new fabric.Line([0, -5, 0, 5], { stroke: 'red', strokeWidth: 2 });
+            // Ajout d'un trait au-dessus du point zéro pour visualiser le début de la mesure
+            const topIndicator = new fabric.Line([0, -25, 0, -12], { stroke: 'red', strokeWidth: 2 });
+            
             const zeroText = new fabric.Text('0', {
-                left: 0, top: 0, originX: 'center', originY: 'center',
+                left: 2, top: 0, originX: 'left', originY: 'center',
                 fontSize: 16, fill: 'red', backgroundColor: 'rgba(42, 42, 42, 1.0)',
                 textBaseline: 'middle' // Corriger explicitement la baseline
             });
-            const zeroPointGroup = new fabric.Group([tickMark, zeroText], {
+            const zeroPointGroup = new fabric.Group([zeroText, topIndicator], {
                 left: lineX,
                 top: lineY,
                 isZeroPoint: true,
@@ -962,8 +964,68 @@ debugCursor() {
             document.dispatchEvent(new CustomEvent('update-ui-tools-state'));
         }
 
+        handleAutoCalibration(preset) {
+            const { realDistanceMeters, scaleDenominator } = preset;
+            console.log('📏 [SCALE] Auto-calibration started:', preset);
+            
+            let pixels;
+
+            if (preset.pixels) {
+                // Utiliser la valeur de pixels fournie directement (basée sur la représentation graphique)
+                pixels = preset.pixels;
+                console.log(`📏 [SCALE] Utilisation des pixels fournis: ${pixels}px pour ${realDistanceMeters}m`);
+            } else {
+                // Fallback: Calculer les pixels basés sur une résolution standard de 96 DPI
+                const pixelsPerCm = 37.7952755906;
+                const realDistanceCm = realDistanceMeters * 100;
+                const planDistanceCm = realDistanceCm / scaleDenominator;
+                pixels = planDistanceCm * pixelsPerCm;
+                console.log(`📏 [SCALE] Auto-calc (96 DPI): ${realDistanceMeters}m @ 1:${scaleDenominator} -> ${planDistanceCm}cm on plan -> ${pixels}px`);
+            }
+            
+            // Demander uniquement l'échelle finale
+            const finalScaleDenominatorStr = prompt("Quelle sera l'échelle finale de votre plan (ex: 200 pour 1:200) ?", "200");
+            const finalScaleDenominator = parseFloat(finalScaleDenominatorStr);
+            
+            if (isNaN(finalScaleDenominator) || finalScaleDenominator <= 0) {
+                alert("Entrée invalide pour l'échelle finale.");
+                return;
+            }
+
+            // Appliquer la calibration
+            this.state.scaleInfo.ratio = pixels / (realDistanceMeters * 100);
+            this.state.scaleInfo.userDefinedScaleDenominator = scaleDenominator;
+            this.state.scaleInfo.finalScaleDenominator = finalScaleDenominator;
+
+            console.log('📏 [SCALE] Ratio calculé:', this.state.scaleInfo.ratio);
+
+            // Calculer et appliquer le zoom
+            const newZoom = scaleDenominator / finalScaleDenominator;
+            console.log(`🔍 [SCALE] Application du zoom: ${newZoom} (Base: 1:${scaleDenominator}, Finale: 1:${finalScaleDenominator})`);
+            
+            document.dispatchEvent(new CustomEvent('apply-zoom', { detail: { zoom: newZoom } }));
+            
+            // Passer à l'étape suivante : Verrouiller et mettre à jour l'état
+            this.state.isZoomLocked = true;
+            this.state.setWorkflowState('scale_calibrated');
+            
+            // Sélectionner automatiquement l'outil déplacer calque/vue
+            setTimeout(() => {
+                this.setMode('layer-move');
+            }, 100);
+            
+            document.dispatchEvent(new CustomEvent('update-all-projections'));
+            document.dispatchEvent(new CustomEvent('update-layers-panel'));
+            document.dispatchEvent(new CustomEvent('update-zoom-display'));
+            document.dispatchEvent(new CustomEvent('update-ui-tools-state'));
+        }
+
         handleScale(pixels) {
-            const realDistanceMeters = parseFloat(prompt("Distance réelle en mètres pour cette ligne ?"));
+            let realDistanceMeters, baseScaleDenominator, finalScaleDenominator;
+
+            // Logique manuelle existante
+            const realDistanceMetersStr = prompt("Distance réelle en mètres pour cette ligne ?");
+            realDistanceMeters = parseFloat(realDistanceMetersStr);
             if (isNaN(realDistanceMeters) || realDistanceMeters <= 0) {
                 alert("Entrée invalide pour la distance réelle.");
                 this.resetScaleDrawingState();
@@ -971,7 +1033,7 @@ debugCursor() {
             }
 
             const baseScaleDenominatorStr = prompt("Veuillez entrer l'échelle de base de votre plan (ex: 500 pour 1:500).\nCeci est nécessaire pour le calibrage.", "500");
-            const baseScaleDenominator = parseFloat(baseScaleDenominatorStr);
+            baseScaleDenominator = parseFloat(baseScaleDenominatorStr);
             if (isNaN(baseScaleDenominator) || baseScaleDenominator <= 0) {
                 alert("Entrée invalide pour l'échelle de base.");
                 this.resetScaleDrawingState();
@@ -979,7 +1041,7 @@ debugCursor() {
             }
 
             const finalScaleDenominatorStr = prompt("Quelle sera l'échelle finale de votre plan (ex: 200 pour 1:200) ?", "200");
-            const finalScaleDenominator = parseFloat(finalScaleDenominatorStr);
+            finalScaleDenominator = parseFloat(finalScaleDenominatorStr);
             if (isNaN(finalScaleDenominator) || finalScaleDenominator <= 0) {
                 alert("Entrée invalide pour l'échelle finale.");
                 this.resetScaleDrawingState();
@@ -1058,7 +1120,7 @@ debugCursor() {
 
             line.set({
                 stroke: 'black',
-                strokeDashArray: [5, 5],
+                strokeDashArray: [],
                 selectable: true,
                 evented: true,
                 isMeasurement: true,
@@ -1759,8 +1821,10 @@ debugCursor() {
             }
             console.log('✅ Canvas actif trouvé:', canvas.id || 'canvas principal');
             
-            const widthPx = widthM * 100 * this.state.scaleInfo.ratio;
-            const lengthPx = lengthM * 100 * this.state.scaleInfo.ratio;
+            // CORRECTION: Soustraire l'épaisseur du trait pour que la dimension VISUELLE (trait inclus) soit exacte
+            const widthPx = (widthM * 100 * this.state.scaleInfo.ratio) - thickness;
+            const lengthPx = (lengthM * 100 * this.state.scaleInfo.ratio) - thickness;
+            
             const commonProps = { stroke: color, strokeWidth: thickness, originX: 'left', originY: 'top' };
             const vehicleId = 'vehicle_' + Date.now();
 

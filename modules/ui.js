@@ -116,7 +116,49 @@
             document.addEventListener('update-undo-redo-buttons', () => {
                 this.updateUndoRedoButtons();
             });
+            
+            this.setupScaleChoiceEvents();
+        }
 
+        setupScaleChoiceEvents() {
+            const btn1_500 = document.getElementById('scale-choice-1-500');
+            const btn1_250 = document.getElementById('scale-choice-1-250');
+            const btnManual = document.getElementById('btn-manual-calibration');
+
+            if (btn1_500) {
+                btn1_500.addEventListener('click', () => {
+                    this.hideScaleChoiceModal();
+                    // Calibration automatique basée sur la largeur TOTALE visuelle (traits inclus)
+                    // Largeur interne (72px) + Bordure gauche (2px) + Bordure droite (2px) = 76px
+                    this.toolsManager.handleAutoCalibration({
+                        realDistanceMeters: 10,
+                        scaleDenominator: 500,
+                        pixels: 76 
+                    });
+                });
+            }
+
+            if (btn1_250) {
+                btn1_250.addEventListener('click', () => {
+                    this.hideScaleChoiceModal();
+                    // Calibration automatique basée sur la largeur TOTALE visuelle (traits inclus)
+                    // Largeur interne (86px) + Bordure gauche (2px) + Bordure droite (2px) = 90px
+                    this.toolsManager.handleAutoCalibration({
+                        realDistanceMeters: 6,
+                        scaleDenominator: 250,
+                        pixels: 90
+                    });
+                });
+            }
+
+            if (btnManual) {
+                btnManual.addEventListener('click', () => {
+                    this.state.scaleInfo.calibrationPreset = null;
+                    this.hideScaleChoiceModal();
+                    // Activer l'outil règle pour la calibration manuelle
+                    this.toolsManager.setMode('scale'); 
+                });
+            }
         }
 
         updateGuideMessage(state) {
@@ -669,6 +711,14 @@
 
         hideAddLayerModal() {
             document.getElementById('add-layer-modal').style.display = 'none';
+        }
+
+        showScaleChoiceModal() {
+            document.getElementById('scale-choice-modal').style.display = 'block';
+        }
+
+        hideScaleChoiceModal() {
+            document.getElementById('scale-choice-modal').style.display = 'none';
         }
 
         showAlignmentGuideModal() {

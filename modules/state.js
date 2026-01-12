@@ -47,7 +47,8 @@
                 ratio: 0, 
                 userDefinedScaleDenominator: null,
                 finalScaleDenominator: null,
-                cropZoomFactor: 1
+                cropZoomFactor: 1,
+                calibrationPreset: null // { realDistanceMeters: number, scaleDenominator: number }
             };
 
             // Zoom

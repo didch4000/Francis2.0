@@ -468,7 +468,8 @@
                 wrapper,
                 x: options.x || 0,
                 y: options.y || 0,
-                angle: 0,
+                angle: options.angle || 0,
+                originalRotation: options.originalRotation || 0, // Stocker l'angle original avant rognage
                 visible: true,
                 opacity: 1.0,
                 locked: false,

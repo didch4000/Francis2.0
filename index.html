@@ -202,6 +202,36 @@
     </div>
 
     <!-- Fenêtre modale pour l'échelle -->
+    <div id="scale-choice-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; height: auto;">
+            <header class="modal-header">
+                <h2>Définir l'échelle</h2>
+            </header>
+            <main class="modal-body">
+                <p>Choisissez une méthode pour définir l'échelle :</p>
+                <div class="scale-options" style="display: flex; gap: 20px; justify-content: center; margin-bottom: 20px;">
+                    <div class="scale-option" id="scale-choice-1-500" style="cursor: pointer; border: 1px solid #ccc; padding: 15px; border-radius: 5px; text-align: center; width: 45%;">
+                        <div style="font-weight: bold; margin-bottom: 10px; color: #3498db; font-size: 1.2em;">1:500</div>
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            <div style="border-left: 2px solid #3498db; border-right: 2px solid #3498db; border-bottom: 2px solid #3498db; height: 10px; width: 72px; position: relative;"></div>
+                        </div>
+                        <div style="color: #3498db; font-size: 0.9em;">10 m</div>
+                        <div style="font-size: 0.8em; color: #666; margin-top: 10px;">Cliquez pour une calibration automatique (1:500)</div>
+                    </div>
+                    <div class="scale-option" id="scale-choice-1-250" style="cursor: pointer; border: 1px solid #ccc; padding: 15px; border-radius: 5px; text-align: center; width: 45%;">
+                        <div style="font-weight: bold; margin-bottom: 10px; color: #3498db; font-size: 1.2em;">1:250</div>
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            <div style="border-left: 2px solid #3498db; border-right: 2px solid #3498db; border-bottom: 2px solid #3498db; height: 10px; width: 86px; position: relative;"></div>
+                        </div>
+                        <div style="color: #3498db; font-size: 0.9em;">6 m</div>
+                        <div style="font-size: 0.8em; color: #666; margin-top: 10px;">Cliquez pour une calibration automatique (1:250)</div>
+                    </div>
+                </div>
+                <button id="btn-manual-calibration" style="width: 100%; padding: 10px; background-color: #f0f0f0; border: 1px solid #ccc; cursor: pointer;">Calibrer manuellement avec l'outil règle (📏)</button>
+            </main>
+        </div>
+    </div>
+
     <div id="scale-modal" class="modal">
         <div class="modal-content" style="max-width: 500px; height: auto;">
             <header class="modal-header">
