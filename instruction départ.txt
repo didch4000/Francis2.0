@@ -12,14 +12,14 @@ Afin de nous faciliter la tâche, nous allons utiliser les cartes disponibles su
   dans Walonmap), réglez le curseur de zoom (en appuyant sur + ou - en bas à gauche de la carte) sur une valeur d'échelle approchant 1/500. Si le plan nécessite peu de réorientation, vous pouvez choisir un zoom plus fort (1/250). 
 - Faites une capture d'écran en appuant soit : 
   - simultanément sur la touche Shift (le plus souvent représentée par la flèche vers le haut à gauche du clavier), la touche windows (la fenêtre représentant le système d'exploitation) et la touche S. Cette méthode permet de délimiter
-  la partie de l'écran à capturer. Sélectionnez alors la carte dans son entierté en n'icluant pas les boutons sur le dessus de la carte et la barre des taches en dessous. Attention à bien inclure la barre représentant l'échelle sous forme 
-  de mètres en bas près du zoom, vous en aurez besoin ultérieurement pour calibrer l'échelle. 
+  la partie de l'écran à capturer. Sélectionnez alors la carte dans son entierté en n'incluant pas les boutons sur le dessus de la carte et la barre des taches en dessous.  Attention à bien inclure la barre représentant l'échelle sous forme 
+  de mètres en bas près du zoom, vous en aurez besoin ultérieurement pour calibrer l'échelle manuellement (inutile pour les échelles 1:250 et 1:500 qui sont implémentées nativement dans l'application). 
   - sur la touche Print Screen (Prt Scn sur certains claviers - parfois nécessaire d'appuyer sur Shift en même temps si la touche à deux affectations). L'inconvénient de cette méthode est que l'écran entier est capturé.
   - vous pouvez aussi utiliser l'outil Sniper Tool si vous préférez
-- Une fois la capture d'écran faites, vous pouvez ouvrir l'application Paint, ouvrir un nouveau fichier et coller (Ctrl-V ou clique bouton droit - coller) l'image capturée. Enregistrez-là sous le nom "Calque de fond" au format jpg ou png.
+- Une fois la capture d'écran faite, vous pouvez ouvrir l'application Paint, ouvrir un nouveau fichier et coller (Ctrl-V ou clique bouton droit - coller) l'image capturée. Enregistrez-là sous le nom "Calque de fond" au format jpg ou png.
   Il vous est aussi posssible de passer cette étape en collant depuis directement dans l'application de dessin du croquis en appuyant sur le bouton intitulé "Ajouter image de fond" situé en bas à gauche. Si vous avez enregistré l'image,
   vous devrez aussi utiliser ce bouton pour charger votre image, mais vous pourrez le faire ultérieurement.
-- Malheureusement, il manque un élément essentiel au plan fourni par Walonmap, à savoir les marquages routiers. Vous allez utiliser le programme pour les retracer dessus mais nous allons avoir besoin d'une vue aérienne de type Google Map.
+- Malheureusement, il manque un élément essentiel au plan fourni par Walonmap, à savoir les marquages routiers. Vous allez utiliser le programme pour les retracer dessus mais nous allons avoir besoin d'une vue aérienne de type Google Maps.
   Revenons dans notre onglet walonmap et dans appuyons sur le bouton "Fond de plan et voyage dans le temps" pour choisir "Vue Aérienne". La vue comprend maintenant les différents marquages routiers que nous allons reprter sur notre croquis.
   Utilisez la même procédure que ci-dessus pour capturer la même zone du plan que précédemment et ce à la même échelle (important pour la cohérence du croquis). Enregistrer cette capture d'écran dans un nouveau fichier ou coller la directement
   dans l'application en appuyant sur le bouton "Ajouter un calque image".	
@@ -27,5 +27,5 @@ Afin de nous faciliter la tâche, nous allons utiliser les cartes disponibles su
   Suivez ensuite les consignes affichées à l'écran.
 		
 Une fois les deux images chargées dans votre projet, déplacez le calque de la vue aérienne pour qu'il se supperpose exactement avec le calque de fond et tracez les marquages routiers en sélectionnant le calque de dessin et en utilisant
-les outils mis à votre disposition. Je vous laisse les découvrir en testant par vous-mêmes. 
+les outils mis à votre disposition.
 

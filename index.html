@@ -399,6 +399,32 @@
         </div>
     </div>
 
+    <!-- Fenêtre modale pour le disclaimer -->
+    <div id="disclaimer-modal" class="modal" style="display: flex; z-index: 20000;">
+        <div class="modal-content" style="max-width: 600px; height: auto; text-align: center; border: 2px solid #ff4444;">
+            <header class="modal-header" style="justify-content: center; border-bottom: 1px solid #555;">
+                <h2 style="color: #ff4444; margin: 0;">⚠️ AVERTISSEMENT IMPORTANT</h2>
+            </header>
+            <main class="modal-body" style="padding: 20px;">
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; text-align: left;">
+                    L’utilisateur est seul responsable de la vérification du résultat final, notamment de l’exactitude des mesures, des coordonnées et des représentations graphiques.
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; text-align: left;">
+                    Ce logiciel est fourni « tel quel » comme outil d’aide et peut comporter des approximations ou erreurs.
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; text-align: left;">
+                    Le créateur du logiciel décline toute responsabilité pour tout usage, décision, dommage, perte ou conséquence liés aux résultats obtenus ou à leur interprétation.
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 30px; font-weight: bold; color: #eee; text-align: left; background-color: #3c3c3c; padding: 15px; border-radius: 5px; border-left: 4px solid #ff4444;">
+                    En utilisant ce logiciel, vous vous engagez à contrôler et valider de manière indépendante toutes les informations avant toute utilisation, publication ou transmission.
+                </p>
+                <button id="accept-disclaimer-btn" style="background-color: #28a745; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; transition: background-color 0.2s;">
+                    J'ai lu et j'accepte les conditions
+                </button>
+            </main>
+        </div>
+    </div>
+
     <!-- SOLUTION SANS SERVEUR : Chargement des scripts dans l'ordre -->
     
     <!-- 1. D'abord l'état global -->

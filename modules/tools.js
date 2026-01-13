@@ -864,8 +864,10 @@ debugCursor() {
             
             const zeroText = new fabric.Text('0', {
                 left: 2, top: 0, originX: 'left', originY: 'center',
-                fontSize: 16, fill: 'red', backgroundColor: 'rgba(42, 42, 42, 1.0)',
-                textBaseline: 'middle' // Corriger explicitement la baseline
+                fontSize: 16, fill: 'red', backgroundColor: 'white',
+                textBaseline: 'middle', // Corriger explicitement la baseline
+                name: 'zeroText', // Identifier l'objet texte
+                isZeroText: true // Marqueur explicite
             });
             const zeroPointGroup = new fabric.Group([zeroText, topIndicator], {
                 left: lineX,
@@ -1118,13 +1120,73 @@ debugCursor() {
             const measuredMeters = measuredCm / 100;
             const uniqueId = 'measure_' + Date.now();
 
+            // Calcul de l'angle pour les flèches
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
             line.set({
                 stroke: 'black',
-                strokeDashArray: [],
+                strokeDashArray: [5, 5], // Ligne pointillée
                 selectable: true,
                 evented: true,
                 isMeasurement: true,
                 measureId: uniqueId
+            });
+
+            // Création des flèches
+            const arrowSize = 10;
+            // Calcul du décalage pour que la pointe soit exactement sur le point
+            // Le triangle a son origine au centre. La hauteur est arrowSize.
+            // La distance du centre à la pointe est arrowSize / 2
+            
+            // Pour la flèche de départ (pointe vers l'extérieur = vers start)
+            // L'angle est angle - 90. La pointe est en haut du triangle (dans son repère local).
+            // On doit décaler le centre du triangle "vers l'intérieur" de la ligne
+            const offsetStartX = (arrowSize / 2) * Math.cos(angle * Math.PI / 180);
+            const offsetStartY = (arrowSize / 2) * Math.sin(angle * Math.PI / 180);
+
+            const arrowHead1 = new fabric.Triangle({
+                left: start.x + offsetStartX,
+                top: start.y + offsetStartY,
+                originX: 'center',
+                originY: 'center',
+                width: arrowSize,
+                height: arrowSize,
+                fill: 'black',
+                angle: angle - 90, 
+                selectable: true,
+                evented: true,
+                isMeasurement: true,
+                measureId: uniqueId,
+                hasControls: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                name: 'measure-arrow-start'
+            });
+
+            // Pour la flèche de fin (pointe vers l'extérieur = vers end)
+            // On doit décaler le centre du triangle "vers l'intérieur" de la ligne (direction opposée)
+            const offsetEndX = -(arrowSize / 2) * Math.cos(angle * Math.PI / 180);
+            const offsetEndY = -(arrowSize / 2) * Math.sin(angle * Math.PI / 180);
+
+            const arrowHead2 = new fabric.Triangle({
+                left: end.x + offsetEndX,
+                top: end.y + offsetEndY,
+                originX: 'center',
+                originY: 'center',
+                width: arrowSize,
+                height: arrowSize,
+                fill: 'black',
+                angle: angle + 90, 
+                selectable: true,
+                evented: true,
+                isMeasurement: true,
+                measureId: uniqueId,
+                hasControls: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                name: 'measure-arrow-end'
             });
 
             const text = new fabric.Text(measuredMeters.toFixed(1), {
@@ -1142,7 +1204,7 @@ debugCursor() {
 
             const canvas = this.state.getActiveCanvas();
             if (canvas) {
-                canvas.add(line, text);
+                canvas.add(line, arrowHead1, arrowHead2, text);
                 
                 // Sauvegarder l'état après création de la mesure
                 this.layerManager.undoRedoManager.saveState(canvas, this.state.getActiveLayer());

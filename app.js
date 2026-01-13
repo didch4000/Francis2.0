@@ -50,6 +50,18 @@
 
         console.log('✅ Tous les modules sont chargés');
 
+        // Gestion du disclaimer
+        const disclaimerModal = document.getElementById('disclaimer-modal');
+        const acceptDisclaimerBtn = document.getElementById('accept-disclaimer-btn');
+
+        if (disclaimerModal && acceptDisclaimerBtn) {
+            acceptDisclaimerBtn.addEventListener('click', () => {
+                disclaimerModal.style.display = 'none';
+                // Enregistrer l'acceptation si nécessaire (optionnel pour l'instant)
+                console.log('✅ Disclaimer accepté par l\'utilisateur');
+            });
+        }
+
         // Vérifier que les éléments DOM essentiels existent
         const essentialElements = [
             'signs-grid',

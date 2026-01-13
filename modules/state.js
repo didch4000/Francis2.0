@@ -39,7 +39,7 @@
                 'isMeasurement', 'isScaleBar', 'isControlPoint', 'isStriped', 'stripeAngle',
                 'stripeColor', 'stripeThickness', 'originalColor', 'id', 'measureId', 'projectionId',
                 'projectionVehicleId', 'projectionLandmarkId', 'projectionCorner', 'projectionRole',
-                'suppressedCorners', 'name', 'backgroundImage'
+                'suppressedCorners', 'name', 'backgroundImage', 'isZeroText'
             ];
 
             // Informations d'échelle

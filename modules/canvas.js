@@ -199,6 +199,30 @@
 
             // Mouse down event - Ne pas sauvegarder automatiquement pour les modes de dessin
             canvas.on('mouse:down', (o) => {
+                // Gestion manuelle du double clic (fallback)
+                const currentTime = new Date().getTime();
+                const lastClickTime = this.lastClickTime || 0;
+                const timeDiff = currentTime - lastClickTime;
+                
+                // Détecter si c'est le même objet ou groupe
+                let isSameTarget = false;
+                if (o.target && this.lastClickTarget) {
+                    if (o.target === this.lastClickTarget) isSameTarget = true;
+                    // Vérifier si c'est le même groupe parent
+                    if (o.target.group && this.lastClickTarget.group && o.target.group === this.lastClickTarget.group) isSameTarget = true;
+                    // Vérifier si l'un est le parent de l'autre
+                    if (o.target.group === this.lastClickTarget) isSameTarget = true;
+                    if (this.lastClickTarget.group === o.target) isSameTarget = true;
+                }
+
+                if (timeDiff < 300 && timeDiff > 50 && isSameTarget) {
+                    console.log('⚡ [MANUAL DBLCLICK] Double clic manuel détecté via mouse:down');
+                    this.handleZeroPointDoubleClick(o.target, canvas);
+                }
+                
+                this.lastClickTime = currentTime;
+                this.lastClickTarget = o.target;
+
                 if (this.state.isLoadingState || this.state.isSelectingArea) return;
                 
                 // Marquer le début de création de courbe pour bloquer toutes les sauvegardes
@@ -252,6 +276,12 @@
                 } else {
                     this.handleMouseUp(drawingCanvas, o, saveCurrentState);
                 }
+            });
+
+            // Double click event for Zero Point
+            canvas.on('mouse:dblclick', (o) => {
+                console.log('⚡ [EVENT DEBUG] Canvas double click fired!', o);
+                this.handleZeroPointDoubleClick(o.target, canvas);
             });
 
             // Object events
@@ -373,6 +403,85 @@
             }
         }
 
+
+        handleZeroPointDoubleClick(target, canvas) {
+            if (!target) return;
+
+            console.log('⚡ [DBLCLICK HANDLER] Target:', target.type, target.isZeroPoint ? 'isZeroPoint' : 'notZeroPoint');
+
+            // Remonter vers le groupe parent si la cible n'est pas le point zéro elle-même
+            let group = target;
+            
+            // 1. Vérifier si c'est directement le groupe point zéro
+            if (!group.isZeroPoint) {
+                // 2. Vérifier si c'est un objet DANS le groupe (via .group)
+                if (group.group && group.group.isZeroPoint) {
+                    group = group.group;
+                }
+                // 3. Vérifier si c'est le texte "0" spécifiquement (via isZeroText)
+                else if (group.isZeroText && group.group) {
+                    // Si on a cliqué sur le texte mais que group.group n'a pas isZeroPoint (cas bizarre), on vérifie le nom
+                    if (group.group.name === 'Zero' || group.group.isZeroPoint) {
+                        group = group.group;
+                    }
+                }
+            }
+
+            if (group && group.isZeroPoint) {
+                console.log('🎯 [ZERO POINT] Valid ZeroPoint target found for double click');
+                
+                // Trouver l'objet texte dans le groupe
+                // On cherche soit par le marqueur isZeroText, soit par le type text
+                const objects = group.getObjects();
+                const textObj = objects.find(obj => obj.isZeroText || obj.name === 'zeroText' || obj.type === 'text');
+                
+                if (textObj) {
+                    const currentText = textObj.text;
+                    // Basculer entre 0 et 0'
+                    // Gérer aussi les cas où il y aurait des espaces ou autres
+                    const cleanText = currentText.trim();
+                    const newText = (cleanText === '0') ? "0'" : '0';
+                    
+                    console.log(`🎯 [ZERO POINT] Toggling text from "${currentText}" to "${newText}"`);
+                    
+                    try {
+                        // Méthode robuste pour mettre à jour un objet dans un groupe Fabric.js :
+                        // 1. Retirer l'objet avec mise à jour du groupe
+                        group.removeWithUpdate(textObj);
+                        
+                        // 2. Modifier l'objet
+                        textObj.set('text', newText);
+                        
+                        // 3. Réajouter l'objet avec mise à jour du groupe
+                        // Note : addWithUpdate gère le recalcul des dimensions et la position relative
+                        group.addWithUpdate(textObj);
+                        
+                        // S'assurer que le groupe conserve ses propriétés critiques
+                        group.set({
+                            isZeroPoint: true,
+                            hasControls: false,
+                            selectable: true,
+                            name: 'Zero',
+                            dirty: true
+                        });
+                        
+                        canvas.requestRenderAll();
+                        
+                        // Sauvegarder l'état
+                        const layer = this.state.layers.find(l => l.fabricCanvas === canvas);
+                        if (layer && this.layerManager.undoRedoManager) {
+                            this.layerManager.undoRedoManager.saveState(canvas, layer);
+                        }
+                    } catch (e) {
+                        console.error('❌ [ZERO POINT] Error updating text:', e);
+                    }
+                } else {
+                    console.warn('⚠️ [ZERO POINT] Text object not found in group');
+                }
+            } else {
+                console.log('❌ [DBLCLICK HANDLER] Target is not ZeroPoint');
+            }
+        }
 
       handleMouseDown(canvas, o, saveCurrentState) {
     const pointer = this.getCorrectedPointer(canvas, o.e);
@@ -1476,9 +1585,12 @@ setupSelectionEvents(canvas) {
         }
     }
     else if (removedObj.isMeasurement && removedObj.measureId) {
+        if (this.state.isCleaningUpMeasure) return;
         this.state.isCleaningUpMeasure = true;
-        const sibling = canvas.getObjects().find(obj => obj.measureId === removedObj.measureId && obj !== removedObj);
-        if (sibling) canvas.remove(sibling);
+        const siblings = canvas.getObjects().filter(obj => obj.measureId === removedObj.measureId && obj !== removedObj);
+        if (siblings.length > 0) {
+            canvas.remove(...siblings);
+        }
         this.state.isCleaningUpMeasure = false;
     }
 
