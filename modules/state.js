@@ -124,6 +124,7 @@
             this.layerCounter = 0;
             this.workflowState = 'start';
             this.isCreatingNewProject = false;
+            this.isDroneImport = false;
             this.scaleInfo = { 
                 ratio: 0, 
                 userDefinedScaleDenominator: null,

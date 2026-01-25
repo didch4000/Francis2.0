@@ -549,12 +549,20 @@
             const activeLayer = this.state.getActiveLayer();
             if (activeLayer) {
                 if (activeLayer.name === this.state.DRAWING_LAYER_NAME) {
+                    // Pour le calque de dessin, passer en mode select si on était en layer-move
                     if (this.state.currentMode === 'layer-move') {
                         this.state.setCurrentMode('select');
                     }
                 } else {
-                    if (this.state.workflowState === 'ready_for_drawing' && this.state.currentMode !== 'layer-move') {
+                    // ✅ FIX : Pour les autres calques (drone, image), passer en mode layer-move
+                    // Cela permet de déplacer le calque immédiatement après l'avoir sélectionné
+                    // Vérifier aussi si le calque a des poignées de redimensionnement (calque drone calibré)
+                    const hasResizeHandles = activeLayer.resizeHandles && activeLayer.resizeHandles.length > 0;
+                    const isDroneLayer = activeLayer.name.toLowerCase().includes('drone');
+
+                    if ((this.state.workflowState === 'ready_for_drawing' || hasResizeHandles || isDroneLayer) && this.state.currentMode !== 'layer-move') {
                         this.state.setCurrentMode('layer-move');
+                        console.log('🔄 Mode changé vers layer-move pour le calque:', activeLayer.name);
                     }
                 }
             }
@@ -621,6 +629,11 @@
             if (layer) {
                 layer.angle = angle;
                 layer.wrapper.style.transform = `translate(${layer.x}px, ${layer.y}px) rotateZ(${layer.angle}deg)`;
+
+                // ✅ FIX : Mettre à jour les positions des poignées lors de la rotation
+                if (layer.resizeHandles && layer.resizeHandles.length > 0) {
+                    document.dispatchEvent(new CustomEvent('update-handles-positions', { detail: { layerId: id } }));
+                }
             }
         }
 
@@ -637,7 +650,15 @@
         updateZIndexes() {
             const len = this.state.layers.length;
             this.state.layers.forEach((layer, index) => {
-                layer.wrapper.style.zIndex = len - 1 - index;
+                // Si c'est le calque de dessin, on force toujours un z-index élevé
+                if (layer.name === this.state.DRAWING_LAYER_NAME) {
+                    layer.wrapper.style.setProperty('z-index', '100', 'important');
+                } else {
+                    // Pour les autres calques, on calcule dynamiquement
+                    // len - 1 - index donne l'ordre inverse : premier élément (dessin) = len-1, dernier élément (fond) = 0
+                    const zIndex = len - 1 - index;
+                    layer.wrapper.style.setProperty('z-index', zIndex.toString(), 'important');
+                }
             });
         }
 

@@ -24,6 +24,35 @@
             this.setupCustomEvents();
             this.setupProjectionEvents();
             this.setupFullscreenEvents();
+
+            // ✅ FIX : Réinitialiser les options par défaut pour tous les sélecteurs
+            this.resetDefaultDrawingOptions();
+        }
+
+        // ✅ NOUVELLE MÉTHODE : Réinitialiser les options par défaut (noir, trait fin)
+        resetDefaultDrawingOptions() {
+            const defaultColor = '#000000'; // Noir
+            const defaultThickness = '2'; // Trait fin
+
+            // Sélecteurs de dessin
+            const colorPicker = document.getElementById('color-picker');
+            const thicknessSelector = document.getElementById('thickness-selector');
+
+            // Sélecteurs de forme
+            const colorPickerShape = document.getElementById('color-picker-shape');
+            const thicknessSelectorShape = document.getElementById('thickness-selector-shape');
+
+            // Sélecteur de texte
+            const colorPickerText = document.getElementById('color-picker-text');
+
+            // Appliquer les valeurs par défaut
+            if (colorPicker) colorPicker.value = defaultColor;
+            if (thicknessSelector) thicknessSelector.value = defaultThickness;
+            if (colorPickerShape) colorPickerShape.value = defaultColor;
+            if (thicknessSelectorShape) thicknessSelectorShape.value = defaultThickness;
+            if (colorPickerText) colorPickerText.value = defaultColor;
+
+            console.log('✅ Options par défaut réinitialisées: couleur noir, épaisseur 2 (trait fin)');
         }
 
         setupToolbarEvents() {
@@ -235,11 +264,21 @@
 
             // Gestion des fichiers
             this.setupFileEvents();
+
+            // Gestion du bouton Drone
+            const btnImportDrone = document.getElementById('btn-import-drone');
+            if (btnImportDrone) {
+                btnImportDrone.addEventListener('click', () => {
+                    const droneLoader = document.getElementById('drone-layer-loader');
+                    if (droneLoader) droneLoader.click();
+                });
+            }
         }
 
         setupFileEvents() {
             const imageLoader = document.getElementById('image-loader');
             const imageLayerLoader = document.getElementById('image-layer-loader');
+            const droneLayerLoader = document.getElementById('drone-layer-loader');
 
             imageLoader.addEventListener('change', (e) => {
                 this.handleFileLoad(e, 'base');
@@ -248,6 +287,12 @@
             imageLayerLoader.addEventListener('change', (e) => {
                 this.handleFileLoad(e, 'subsequent');
             });
+
+            if (droneLayerLoader) {
+                droneLayerLoader.addEventListener('change', (e) => {
+                    this.handleDroneFileLoad(e);
+                });
+            }
 
             // Gestion des panneaux personnalisés
             document.body.addEventListener('change', (e) => {
@@ -282,8 +327,82 @@
                 });
             });
 
+            // Bouton de validation de l'alignement (spécifique Drone)
+            const btnValidateAlignment = document.getElementById('btn-validate-alignment');
+            if (btnValidateAlignment) {
+                btnValidateAlignment.addEventListener('click', () => {
+                    this.handleAlignmentValidation();
+                });
+            }
+
             // Modal d'ajout de calque
             this.setupAddLayerModalEvents();
+        }
+
+        handleAlignmentValidation() {
+            if (!this.state.isDroneImport) return;
+
+            console.log('🚁 Validation de l\'alignement Drone');
+            this.uiManager.hideAlignmentGuideModal();
+
+            // Fin du mode import drone
+            this.state.isDroneImport = false;
+
+            // ✅ FIX : Réinitialiser les options par défaut (noir, trait fin) après l'alignement
+            this.resetDefaultDrawingOptions();
+
+            // Trouver le calque drone
+            const droneLayer = this.state.layers.find(l => l.name === "Vue Drone");
+            if (!droneLayer) {
+                console.error("Calque drone introuvable");
+                return;
+            }
+
+            // Verrouiller le calque drone
+            droneLayer.locked = true;
+            if (this.uiManager) this.uiManager.updateLayersPanel();
+
+            // Créer le calque de dessin par dessus
+            const width = droneLayer.fabricCanvas.width;
+            const height = droneLayer.fabricCanvas.height;
+
+            // S'assurer que le calque de dessin n'existe pas déjà
+            if (!this.state.layers.some(l => l.name === this.state.DRAWING_LAYER_NAME)) {
+                this.layerManager.createLayer(this.state.DRAWING_LAYER_NAME, null, {
+                    width: width,
+                    height: height,
+                    x: 0,
+                    y: 0,
+                    pixelRatio: window.devicePixelRatio
+                });
+            }
+
+            const drawingLayer = this.state.getActiveLayer();
+            
+            // Configurer le canvas du calque de dessin
+            this.canvasManager.setupCanvasListeners(drawingLayer.fabricCanvas);
+
+            this.state.setWorkflowState('ready_for_drawing');
+            
+            // Déverrouiller le zoom
+            this.state.isZoomLocked = false;
+            
+            // Appliquer le zoom final si défini
+            if (this.state.scaleInfo.finalScaleDenominator && this.state.scaleInfo.userDefinedScaleDenominator) {
+                const finalZoom = this.state.scaleInfo.userDefinedScaleDenominator / this.state.scaleInfo.finalScaleDenominator;
+                console.log('🚁 [DRONE] Application du zoom final:', finalZoom);
+                this.applyZoom(finalZoom, true);
+            }
+
+            // Mettre à jour l'interface
+            document.dispatchEvent(new CustomEvent('update-ui-tools-state'));
+            
+            // Activer l'outil sélection
+            this.toolsManager.setMode('select');
+
+            // Cacher le message de guidage
+            const guideMessage = document.getElementById('guide-message');
+            if (guideMessage) guideMessage.style.display = 'none';
         }
 
         setupAddLayerModalEvents() {
@@ -989,6 +1108,78 @@ handleLoadingStateChange(isLoading) {
             e.target.value = '';
         }
 
+        handleDroneFileLoad(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => this.processDroneImage(event.target.result);
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        processDroneImage(dataUrl) {
+            const img = new Image();
+            img.onload = () => {
+                // Créer le calque drone comme un calque supplémentaire
+                // Calcul de l'échelle initiale pour qu'il ne soit pas trop grand/petit par rapport à la vue actuelle
+                
+                // On l'ajoute comme un calque supplémentaire (pas base)
+                // On utilise une échelle arbitraire temporaire, elle sera corrigée par la calibration
+                this.layerManager.createLayer("Vue drone", img, {
+                    insertBelowDrawing: true,
+                    opacity: 0.7 // Semi-transparent par défaut pour faciliter l'alignement
+                });
+
+                // Mettre à jour les z-index pour s'assurer que le drone est au-dessus du plan rogné
+                this.layerManager.updateZIndexes();
+
+                // Configurer pour le contraste élevé
+                this.setHighContrastDefaults();
+
+                // Marquer comme import de drone pour la logique de calibration
+                this.state.isDroneImport = true;
+
+                // ✅ FIX : Activer explicitement le bouton scale pour la calibration drone
+                const btnScale = document.getElementById('btn-scale');
+                if (btnScale) {
+                    btnScale.disabled = false;
+                    console.log('✅ Bouton scale activé pour calibration drone');
+                }
+
+                // Alerte spécifique pour le drone
+                alert("🚁 Vue Drone importée.\n\nVEUILLEZ CALIBRER L'IMAGE :\nTracez une ligne sur une distance connue sur la photo du drone (ex: entre deux marquages) pour ajuster son échelle à celle du plan.");
+
+                // Forcer le mode calibration manuelle directement
+                this.toolsManager.setMode('scale');
+            };
+            img.src = dataUrl;
+        }
+
+        setHighContrastDefaults() {
+            // Passer en mode contraste élevé pour une meilleure visibilité sur photo
+            console.log('🌓 Activation du mode contraste élevé pour vue drone');
+
+            // 1. Couleur des traits en Jaune vif
+            const colorPicker = document.getElementById('color-picker');
+            const colorPickerShape = document.getElementById('color-picker-shape');
+            const colorPickerText = document.getElementById('color-picker-text');
+
+            const highContrastColor = '#FFFF00'; // Jaune pur
+
+            if (colorPicker) {
+                colorPicker.value = highContrastColor;
+                // Déclencher l'événement change pour propager aux autres pickers via setupShapeControlsSync
+                colorPicker.dispatchEvent(new Event('change'));
+            }
+
+            // Au cas où la synchro ne marche pas, forcer les autres
+            if (colorPickerShape) colorPickerShape.value = highContrastColor;
+            if (colorPickerText) colorPickerText.value = highContrastColor;
+
+            // ✅ FIX : NE PAS changer l'épaisseur - garder le trait fin (2) par défaut
+            // L'épaisseur ne doit pas être modifiée par le mode contraste élevé
+        }
+
         handleCustomSignLoad(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1038,6 +1229,9 @@ handleLoadingStateChange(isLoading) {
             const img = new Image();
             img.onload = () => {
                 if (layerType === 'base') {
+                    // Réinitialiser le flag drone pour les images standard
+                    this.state.isDroneImport = false;
+
                     this.layerManager.createLayer("Image de fond", img);
                     this.state.setWorkflowState('image_loaded');
                     this.toolsManager.setMode('layer-move');
@@ -1138,6 +1332,7 @@ handleLoadingStateChange(isLoading) {
             const vehicleColorInput = document.getElementById('vehicle-color-input');
             const vehicleThicknessInput = document.getElementById('vehicle-thickness-input');
             const vehicleThicknessDisplay = document.getElementById('vehicle-thickness-display');
+            const vehicleDashedInput = document.getElementById('vehicle-dashed-input');
 
             // ✅ CORRECTION FINALE : TOUJOURS supprimer les anciens event listeners avant d'ajouter les nouveaux
             console.log('🚗 État des flags - Submit:', !!submitVehicleBtn._vehicleListenerAdded, 'Close:', !!btnCloseVehicleModal._vehicleListenerAdded);
@@ -1212,6 +1407,7 @@ handleLoadingStateChange(isLoading) {
                 const letter = vehicleLetterInput.value.trim().toUpperCase();
                 const color = vehicleColorInput.value;
                 const thickness = parseInt(vehicleThicknessInput.value);
+                const dashed = vehicleDashedInput.checked;
 
                 if (isNaN(widthM) || isNaN(lengthM) || widthM <= 0 || lengthM <= 0) {
                     alert("Veuillez entrer des dimensions valides.");
@@ -1226,8 +1422,8 @@ handleLoadingStateChange(isLoading) {
                 }
 
                 try {
-                    console.log('🚗 Appel toolsManager.addCarToCanvas avec:', widthM, lengthM, letter, color, thickness);
-                    this.toolsManager.addCarToCanvas(widthM, lengthM, letter, color, thickness);
+                    console.log('🚗 Appel toolsManager.addCarToCanvas avec:', widthM, lengthM, letter, color, thickness, dashed);
+                    this.toolsManager.addCarToCanvas(widthM, lengthM, letter, color, thickness, dashed);
                     console.log('✅ addCarToCanvas terminé avec succès');
                 } catch (error) {
                     console.error('❌ Erreur lors de l\'ajout du véhicule:', error);
@@ -1391,6 +1587,15 @@ handleLoadingStateChange(isLoading) {
             container.scrollTop = newScrollTop;
 
             this.uiManager.updateZoomDisplay();
+
+            // ✅ Mettre à jour la position des poignées après le zoom
+            if (window.PlanEditor.instances?.layerTransformManager) {
+                this.state.layers.forEach(layer => {
+                    if (layer.resizeHandles && layer.resizeHandles.length > 0) {
+                        window.PlanEditor.instances.layerTransformManager.updateHandlePositions(layer);
+                    }
+                });
+            }
         }
 
         updateScrollContentSize() {
@@ -1495,7 +1700,7 @@ handleLoadingStateChange(isLoading) {
 
         updateLayerDrag(coords) {
             if (!this.state.isDraggingLayer) return;
-            
+
             const activeLayer = this.state.startPoint.layer;
             if (!activeLayer) return;
             const dx = coords.x - this.state.startPoint.x;
@@ -1505,9 +1710,20 @@ handleLoadingStateChange(isLoading) {
             activeLayer.wrapper.style.transform = `translate(${activeLayer.x}px, ${activeLayer.y}px) rotateZ(${activeLayer.angle}deg)`;
             this.state.startPoint.x = coords.x;
             this.state.startPoint.y = coords.y;
+
+            // ✅ Mettre à jour la position des poignées si le calque en a
+            if (window.PlanEditor.instances?.layerTransformManager && activeLayer.resizeHandles) {
+                window.PlanEditor.instances.layerTransformManager.updateHandlePositions(activeLayer);
+            }
         }
 
         endLayerDrag() {
+            // ✅ Mettre à jour la position finale des poignées
+            const activeLayer = this.state.getActiveLayer();
+            if (window.PlanEditor.instances?.layerTransformManager && activeLayer && activeLayer.resizeHandles) {
+                window.PlanEditor.instances.layerTransformManager.updateHandlePositions(activeLayer);
+            }
+
             this.state.isDraggingLayer = false;
             document.getElementById('canvas-container').style.cursor = 'move';
         }
@@ -1684,7 +1900,8 @@ handleLoadingStateChange(isLoading) {
                 // Créer le nouveau calque de base
                 this.layerManager.createLayer('Plan rogné', img, { 
                     scaleDenominator: this.state.scaleInfo.userDefinedScaleDenominator,
-                    originalRotation: originalAngle
+                    originalRotation: originalAngle,
+                    insertBelowDrawing: true
                 });
                 const newBaseLayer = this.state.getActiveLayer();
                 newBaseLayer.locked = true;

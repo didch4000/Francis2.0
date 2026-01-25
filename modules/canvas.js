@@ -1066,22 +1066,42 @@ finishDrawing(canvas, endPoint, saveCurrentState) {
         // Ancienne fonction addTextAtPointer supprimée - remplacée par createTextZone
 
         getDrawOptions() {
-            const colorPicker = document.getElementById('color-picker');
-            const thicknessSelector = document.getElementById('thickness-selector');
+            // ✅ FIX : Selon le mode actif, utiliser les bons sélecteurs
+            const isShapeTool = ['crossing', 'yield', 'skid-mark'].includes(this.state.currentMode);
+            const isBaseline = this.state.currentMode === 'baseline';
+
+            // Pour les outils formes, utiliser les sélecteurs de forme
+            const colorPickerId = isShapeTool ? 'color-picker-shape' : 'color-picker';
+            const thicknessSelectorId = isShapeTool ? 'thickness-selector-shape' : 'thickness-selector';
+
+            const colorPicker = document.getElementById(colorPickerId);
+            const thicknessSelector = document.getElementById(thicknessSelectorId);
             const dashedCheckbox = document.getElementById('dashed-checkbox');
             const dashSpacingSelector = document.getElementById('dash-spacing-selector');
-            
-            const desiredStrokeWidth = parseInt(thicknessSelector.value, 10);
+
+            // ✅ FIX : Pour baseline, utiliser le rouge par défaut
+            let color = colorPicker ? colorPicker.value : '#000000';
+            if (isBaseline) {
+                color = '#ff0000'; // Rouge pour la ligne de base
+            }
+
+            // ✅ FIX : S'assurer que l'épaisseur par défaut est bien définie (trait fin = 2)
+            let strokeWidth = 2; // Valeur par défaut
+            if (thicknessSelector) {
+                strokeWidth = parseInt(thicknessSelector.value, 10);
+            }
+
+            const desiredStrokeWidth = strokeWidth;
             const normalizedStrokeWidth = desiredStrokeWidth;
 
             let dashArray = [];
-            if (dashedCheckbox.checked) {
+            if (dashedCheckbox && dashedCheckbox.checked) {
                 const spacingMultiplier = parseInt(dashSpacingSelector.value, 10);
                 dashArray = [normalizedStrokeWidth * spacingMultiplier, normalizedStrokeWidth * spacingMultiplier];
             }
 
             return {
-                stroke: colorPicker.value,
+                stroke: color,
                 strokeWidth: normalizedStrokeWidth,
                 strokeDashArray: dashArray,
                 objectCaching: false,

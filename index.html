@@ -14,6 +14,12 @@
     <div class="app-wrapper">
         <!-- Barre d'outils -->
         <header class="toolbar">
+            <div class="tool-group permanent-tools" id="project-tools">
+                <strong>Projet :</strong>
+                <button id="btn-save-project" title="Sauvegarder le projet" disabled>💾</button>
+                <button id="btn-load-project" title="Charger un projet">📁</button>
+                <button id="btn-new-project" title="Nouveau projet">📄</button>
+            </div>
             <div class="tool-group" id="main-tools">
                 <strong>Outils :</strong>
                 <button id="btn-undo" class="tool" title="Annuler (Ctrl+Z)" disabled>↩️</button>
@@ -37,23 +43,33 @@
                 <button id="btn-toggle-webview" title="Afficher la carte interactive">🌍</button>
                 <button id="btn-fullscreen" title="Mode Plein Écran">⛶</button>
             </div>
-            <div class="tool-group permanent-tools" id="project-tools">
-                <strong>Projet :</strong>
-                <button id="btn-save-project" title="Sauvegarder le projet" disabled>💾</button>
-                <button id="btn-load-project" title="Charger un projet">📁</button>
-                <button id="btn-new-project" title="Nouveau projet">📄</button>
-            </div>
             <div class="tool-group" id="object-tools">
                 <strong>Ajouter Objet :</strong>
                 <button id="btn-add-signs" title="Ajouter un Panneau">🚦</button>
                 <button id="btn-add-car" title="Ajouter Voiture">🚗</button>
                 <button id="btn-add-arrow" title="Ajouter Flèche">➡️</button>
                 <button id="btn-add-text" title="Ajouter Texte">T</button>
-                <button id="btn-crossing" class="tool" title="Dessiner Passage Piéton">🚸</button>
+                <button id="btn-crossing" class="tool" title="Dessiner Passage Piéton">
+    <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="2" width="20" height="2" fill="currentColor"/>
+        <rect x="0" y="6" width="20" height="2" fill="currentColor"/>
+        <rect x="0" y="10" width="20" height="2" fill="currentColor"/>
+        <rect x="0" y="14" width="20" height="2" fill="currentColor"/>
+    </svg>
+</button>
                 <button id="btn-yield" class="tool" title="Dessiner Céder le Passage">▽</button>
                 <button id="btn-fill" class="tool" title="Remplir une zone fermée">🎨</button>
                 <button id="btn-baseline" class="tool" title="Dessiner Ligne de Base">LB</button>
-                <button id="btn-skid-mark" class="tool" title="Dessiner Trace de Freinage">TF</button>
+                <button id="btn-skid-mark" class="tool" title="Dessiner Trace de Freinage">
+    <svg width="20" height="14" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg">
+        <!-- Trace de freinage gauche -->
+        <line x1="2" y1="0" x2="2" y2="5" stroke="currentColor" stroke-width="2"/>
+        <line x1="2" y1="7" x2="2" y2="14" stroke="currentColor" stroke-width="2"/>
+        <!-- Trace de freinage droite -->
+        <line x1="18" y1="0" x2="18" y2="5" stroke="currentColor" stroke-width="2"/>
+        <line x1="18" y1="7" x2="18" y2="14" stroke="currentColor" stroke-width="2"/>
+    </svg>
+</button>
                 <button id="btn-add-landmark" class="tool" title="Ajouter un Point de Repère">📍</button>
                 <span class="landmark-visibility-control">
                     <label for="toggle-landmarks-checkbox" style="cursor:pointer;" title="Afficher/Cacher les Repères">📍 Visible :</label>
@@ -180,7 +196,9 @@
                 <button id="add-image-btn" title="Ajouter une image de fond">🖼️</button>
                 <input type="file" id="image-loader" accept="image/*" style="display:none;">
                 <button id="add-image-layer-btn" title="Ajouter un calque image">➕🖼️</button>
+                <button id="btn-import-drone" title="Importer une vue Drone" disabled>🚁</button>
                 <input type="file" id="image-layer-loader" accept="image/*" style="display:none;">
+                <input type="file" id="drone-layer-loader" accept="image/*" style="display:none;">
                 <button id="start-drawing-btn" title="Créer un calque de dessin" style="display: none;">✏️</button>
                 <span class="separator"></span>
             </div>
@@ -314,6 +332,12 @@
                     <input type="range" id="vehicle-thickness-input" min="1" max="10" value="2">
                     <span id="vehicle-thickness-display">2px</span>
                 </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="vehicle-dashed-input" style="width: auto;">
+                        <span>Trait pointillé</span>
+                    </label>
+                </div>
                 <button id="submit-vehicle-btn">Ajouter le Véhicule</button>
             </main>
         </div>
@@ -332,6 +356,7 @@
                     <li>Utilisez le <strong>curseur d'opacité</strong> sur le calque (en bas) pour voir à travers.</li>
                     <li>Avec l'outil <strong>Déplacer (✥)</strong> actif, cliquez et glissez le calque pour le positionner correctement.</li>
                 </ol>
+                <button id="btn-validate-alignment" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; display: none;">Valider le positionnement</button>
             </main>
         </div>
     </div>
@@ -443,7 +468,8 @@
     <script src="modules/ui.js"></script>
     <script src="modules/export.js"></script>
     <script src="modules/events.js"></script>
-	<script src="modules/projections.js"></script>    
+	<script src="modules/projections.js"></script>
+    <script src="modules/layer-transform.js"></script>
     <!-- 3. Enfin l'initialisation -->
     <script src="app.js"></script>
 </body>

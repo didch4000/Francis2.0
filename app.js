@@ -92,6 +92,9 @@
             const projectionManager = new window.PlanEditor.ProjectionManager(state);
             const projectManager = new window.PlanEditor.ProjectManager(state, layerManager, canvasManager);
 
+            // ✅ FIX : Ajouter LayerTransformManager pour gérer les poignées de redimensionnement
+            const layerTransformManager = new window.PlanEditor.LayerTransformManager(state, layerManager, eventManager);
+
             console.log('✅ Managers créés');
 
             // Exposer les instances pour que les autres modules puissent y accéder
@@ -104,7 +107,8 @@
                 exportManager,
                 eventManager,
                 projectionManager,
-                projectManager
+                projectManager,
+                layerTransformManager
             };
 
             console.log('✅ Instances exposées globalement');

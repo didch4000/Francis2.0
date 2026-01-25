@@ -174,7 +174,11 @@
                     guideMessage.style.display = 'block';
                     break;
                 case 'scale_calibrated':
-                    guideMessage.innerHTML = '<h2>Étape 2/3 : Orienter le plan</h2><p>Utilisez les contrôles de rotation du calque (angle) et l\'outil de déplacement (✥) pour placer horizontalement ce qui vous sert de repère pour la ligne de base. Cliquez sur ✏️ quand vous avez terminé.</p>';
+                    if (this.state.isDroneImport) {
+                        guideMessage.innerHTML = '<h2>Étape 2/3 : Orienter la vue drone</h2><p>Orientez et positionnez la vue. Validez via la fenêtre modale une fois terminé.</p>';
+                    } else {
+                        guideMessage.innerHTML = '<h2>Étape 2/3 : Orienter le plan</h2><p>Utilisez les contrôles de rotation du calque (angle) et l\'outil de déplacement (✥) pour placer horizontalement ce qui vous sert de repère pour la ligne de base. Cliquez sur ✏️ quand vous avez terminé.</p>';
+                    }
                     guideMessage.style.display = 'block';
                     break;
                 case 'ready_for_drawing':
@@ -195,6 +199,7 @@
             // Désactiver tous les groupes d'outils par défaut, sauf le groupe instructions
             document.querySelectorAll('.tool-group:not(.instructions-group)').forEach(group => group.classList.add('disabled'));
             document.getElementById('zoom-tools').classList.remove('disabled');
+            document.getElementById('project-tools').classList.remove('disabled');
             
             // Gérer le verrouillage des boutons de zoom
             const btnZoomIn = document.getElementById('btn-zoom-in');
@@ -220,6 +225,19 @@
             const hasBackgroundLayer = this.state.layers.some(l => l.fabricCanvas.backgroundImage || l.name.includes('fond') || l.name.includes('Image'));
             document.getElementById('add-image-btn').disabled = hasBackgroundLayer || (this.state.workflowState !== 'start');
             document.getElementById('add-image-layer-btn').disabled = (this.state.workflowState !== 'ready_for_drawing');
+            
+            // Le bouton d'import drone est désactivé au démarrage et ne s'active que si le workflow est prêt
+            // Il agit comme un calque supplémentaire
+            const btnImportDrone = document.getElementById('btn-import-drone');
+            if (btnImportDrone) {
+                btnImportDrone.disabled = (this.state.workflowState !== 'ready_for_drawing');
+                // Ajout d'une classe pour le style visuel si nécessaire
+                if (btnImportDrone.disabled) {
+                    btnImportDrone.classList.add('disabled');
+                } else {
+                    btnImportDrone.classList.remove('disabled');
+                }
+            }
 
             const i = hasLayers ? this.state.layers.findIndex(l => l.id === this.state.activeLayerId) : -1;
             
@@ -264,7 +282,9 @@
                     break;
             }
 
-            if (this.state.scaleInfo.ratio > 0) {
+            // ✅ FIX : Ne pas désactiver le bouton scale lors d'un import drone
+            // Le bouton scale doit rester actif pour calibrer la vue drone
+            if (this.state.scaleInfo.ratio > 0 && !this.state.isDroneImport) {
                 document.getElementById('btn-scale').disabled = true;
             }
         }
@@ -296,6 +316,11 @@
             const hasBackgroundLayer = this.state.layers.some(l => l.fabricCanvas.backgroundImage || l.name.includes('fond') || l.name.includes('Image'));
             document.getElementById('add-image-btn').disabled = hasBackgroundLayer || (this.state.workflowState !== 'start');
             document.getElementById('add-image-layer-btn').disabled = (this.state.workflowState !== 'ready_for_drawing');
+            
+            const btnImportDrone = document.getElementById('btn-import-drone');
+            if (btnImportDrone) {
+                btnImportDrone.disabled = (this.state.workflowState !== 'ready_for_drawing');
+            }
             
             // Garder les outils de zoom disponibles
             document.getElementById('zoom-tools').classList.remove('disabled');
@@ -331,9 +356,18 @@
             const drawingLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
             const baselineExists = drawingLayer ? drawingLayer.fabricCanvas.getObjects().some(o => o.isBaseline) : false;
             const scaleCalibrated = this.state.scaleInfo.ratio > 0;
-            
+
+            const btnAddCar = document.getElementById('btn-add-car');
+            btnAddCar.disabled = !isDrawingLayerActive || !baselineExists || !scaleCalibrated;
+
+            // Mettre à jour le tooltip si la ligne de base n'existe pas
+            if (!baselineExists) {
+                btnAddCar.title = "Ajouter une LB avant de pouvoir ajouter un véhicule";
+            } else {
+                btnAddCar.title = "Ajouter Voiture";
+            }
+
             document.getElementById('btn-add-landmark').disabled = !isDrawingLayerActive || !baselineExists || !scaleCalibrated;
-            document.getElementById('btn-add-car').disabled = !isDrawingLayerActive || !baselineExists || !scaleCalibrated;
         }
 
         updateLayersPanel() {
@@ -722,7 +756,15 @@
         }
 
         showAlignmentGuideModal() {
-            document.getElementById('alignment-guide-modal').style.display = 'block';
+            const modal = document.getElementById('alignment-guide-modal');
+            const validateBtn = document.getElementById('btn-validate-alignment');
+            
+            if (validateBtn) {
+                // Afficher le bouton de validation uniquement pour l'import drone
+                validateBtn.style.display = this.state.isDroneImport ? 'block' : 'none';
+            }
+            
+            modal.style.display = 'block';
         }
 
         hideAlignmentGuideModal() {

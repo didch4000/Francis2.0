@@ -27,17 +27,32 @@ body {
     flex-wrap: wrap; /* MODIFICATION : Permet aux groupes d'outils de passer à la ligne sur les petits écrans */
 }
 .tool-group { display: flex; align-items: center; gap: 8px; }
-.tool-group button, .tool-group select, .tool-group input, .tool-group span {
+.tool-group strong {
+    color: #ffffff !important;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* Définir l'ordre explicite de tous les groupes */
+#project-tools { order: 1; }
+#main-tools { order: 2; }
+#measure-tools { order: 3; }
+#zoom-tools { order: 4; }
+#object-tools { order: 5; }
+#drawing-options-tools { order: 6; }
+.tool-group button, .tool-group select, .tool-group input {
     background: #3c3c3c;
     border: 1px solid #555;
     color: #ccc;
     cursor: pointer;
     border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 14px;
+    padding: 3px 8px;
+    font-size: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 28px;
+    box-sizing: border-box;
 }
 
 /* Styles pour les boutons désactivés */
@@ -171,7 +186,13 @@ html body #project-tools #btn-save-project:not(:disabled) {
     visibility: visible !important;
     opacity: 1 !important;
     position: relative !important;
-    order: 3 !important; /* Assure que les boutons projet apparaissent après Vue mais avant les options dynamiques */
+    order: 1 !important; /* Affiche le groupe Projet en premier */
+}
+
+/* Force le titre Projet en blanc */
+html body div.toolbar .permanent-tools#project-tools strong,
+.permanent-tools#project-tools strong {
+    color: #ffffff !important;
 }
 
 /* Groupes d'options dynamiques positionnés après les boutons projet */
@@ -281,6 +302,62 @@ html body div.toolbar div.permanent-tools#project-tools button#btn-save-project:
     left: 0;
     box-shadow: 0 5px 25px rgba(0,0,0,0.4);
 }
+
+/* Contrôles de transformation pour les calques d'images */
+/* ✅ FIX : Les poignées sont attachées au zoom-wrapper, pas au canvas-wrapper */
+/* Le positionnement se fait en JavaScript via updateHandlePositions() */
+.resize-handle {
+    position: absolute;
+    background: #007aff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    /* ✅ FIX : Utiliser margin au lieu de transform pour le centrage */
+    /* Cela évite le conflit avec le transform: scale() au survol */
+    margin-left: -7px;
+    margin-top: -7px;
+    z-index: 999999; /* z-index extrêmement élevé pour être au-dessus de tout */
+    opacity: 1; /* TOUJOURS visible pour les calques resizable */
+    pointer-events: auto; /* TOUJOURS interactif */
+    touch-action: none; /* Empêcher le scroll tactile sur les poignées */
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.resize-handle:hover {
+    background: #0051a8;
+    /* ✅ FIX : Combiner la rotation (définie via variable CSS) et le scale au survol */
+    transform: rotate(var(--rotation, 0deg)) scale(1.2);
+}
+
+/* Curseurs pour chaque type de poignée */
+.resize-handle.ml, .resize-handle.mr {
+    cursor: ew-resize;
+}
+
+.resize-handle.mt, .resize-handle.mb {
+    cursor: ns-resize;
+}
+
+/* ✅ Poignée de rotation */
+.resize-handle.rotate {
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    background: #ff9500; /* Couleur orange pour la distinguer */
+    cursor: grab;
+}
+
+.resize-handle.rotate:hover {
+    background: #cc7700;
+    cursor: grabbing;
+}
+
+.resize-handle.rotate:active {
+    cursor: grabbing;
+}
+
 #guide-message {
     position: fixed;
     top: 50%;
@@ -649,6 +726,27 @@ html body div.toolbar div.permanent-tools#project-tools button#btn-save-project:
     display: flex;
     align-items: center;
     gap: 4px;
+    font-size: 12px;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    height: 28px;
+}
+
+.landmark-visibility-control label {
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+}
+
+.landmark-visibility-control input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 #selection-box {
@@ -780,18 +878,18 @@ body.fullscreen-active .layers-panel.hidden {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="black" d="M5 4V7H10.5V19H13.5V7H19V4H5Z"/></svg>') 12 12, text !important;
 }
 
-/* Mode mesure - curseur latte graduée */
+/* Mode mesure - curseur latte graduée (Fond blanc pour visibilité) */
 #canvas-container.measure-cursor,
 #canvas-container.measure-cursor *,
 #canvas-container.measure-cursor canvas {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="4" fill="none" stroke="black" stroke-width="1.5"/><line x1="3" y1="9" x2="3" y2="15" stroke="black" stroke-width="1"/><line x1="6" y1="10.5" x2="6" y2="13.5" stroke="black" stroke-width="1"/><line x1="9" y1="9" x2="9" y2="15" stroke="black" stroke-width="1"/><line x1="12" y1="10.5" x2="12" y2="13.5" stroke="black" stroke-width="1"/><line x1="15" y1="9" x2="15" y2="15" stroke="black" stroke-width="1"/><line x1="18" y1="10.5" x2="18" y2="13.5" stroke="black" stroke-width="1"/><line x1="21" y1="9" x2="21" y2="15" stroke="black" stroke-width="1"/></svg>') 2 9, crosshair !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="4" fill="white" stroke="black" stroke-width="1.5"/><line x1="3" y1="9" x2="3" y2="15" stroke="black" stroke-width="1"/><line x1="6" y1="10.5" x2="6" y2="13.5" stroke="black" stroke-width="1"/><line x1="9" y1="9" x2="9" y2="15" stroke="black" stroke-width="1"/><line x1="12" y1="10.5" x2="12" y2="13.5" stroke="black" stroke-width="1"/><line x1="15" y1="9" x2="15" y2="15" stroke="black" stroke-width="1"/><line x1="18" y1="10.5" x2="18" y2="13.5" stroke="black" stroke-width="1"/><line x1="21" y1="9" x2="21" y2="15" stroke="black" stroke-width="1"/></svg>') 2 9, crosshair !important;
 }
 
-/* Mode échelle - curseur latte graduée */
+/* Mode échelle - curseur latte graduée (Fond blanc pour visibilité) */
 #canvas-container.scale-cursor,
 #canvas-container.scale-cursor *,
 #canvas-container.scale-cursor canvas {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="4" fill="none" stroke="black" stroke-width="1.5"/><line x1="3" y1="9" x2="3" y2="15" stroke="black" stroke-width="1"/><line x1="6" y1="10.5" x2="6" y2="13.5" stroke="black" stroke-width="1"/><line x1="9" y1="9" x2="9" y2="15" stroke="black" stroke-width="1"/><line x1="12" y1="10.5" x2="12" y2="13.5" stroke="black" stroke-width="1"/><line x1="15" y1="9" x2="15" y2="15" stroke="black" stroke-width="1"/><line x1="18" y1="10.5" x2="18" y2="13.5" stroke="black" stroke-width="1"/><line x1="21" y1="9" x2="21" y2="15" stroke="black" stroke-width="1"/></svg>') 2 9, crosshair !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="4" fill="white" stroke="black" stroke-width="1.5"/><line x1="3" y1="9" x2="3" y2="15" stroke="black" stroke-width="1"/><line x1="6" y1="10.5" x2="6" y2="13.5" stroke="black" stroke-width="1"/><line x1="9" y1="9" x2="9" y2="15" stroke="black" stroke-width="1"/><line x1="12" y1="10.5" x2="12" y2="13.5" stroke="black" stroke-width="1"/><line x1="15" y1="9" x2="15" y2="15" stroke="black" stroke-width="1"/><line x1="18" y1="10.5" x2="18" y2="13.5" stroke="black" stroke-width="1"/><line x1="21" y1="9" x2="21" y2="15" stroke="black" stroke-width="1"/></svg>') 2 9, crosshair !important;
 }
 
 /* Mode ligne de base */
@@ -819,7 +917,7 @@ body.fullscreen-active .layers-panel.hidden {
 #canvas-container.skid-mark-cursor,
 #canvas-container.skid-mark-cursor *,
 #canvas-container.skid-mark-cursor canvas {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="black" d="M2 2L4 6L6 2H8L6 6L8 10L6 14L4 10L2 6L4 2H2ZM10 4L12 8L14 4H16L14 8L16 12L14 16L12 12L10 8L12 4H10Z"/></svg>') 12 12, crosshair !important;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><line x1="6" y1="0" x2="6" y2="6" stroke="black" stroke-width="3"/><line x1="6" y1="9" x2="6" y2="15" stroke="black" stroke-width="3"/><line x1="6" y1="18" x2="6" y2="24" stroke="black" stroke-width="3"/><line x1="18" y1="0" x2="18" y2="6" stroke="black" stroke-width="3"/><line x1="18" y1="9" x2="18" y2="15" stroke="black" stroke-width="3"/><line x1="18" y1="18" x2="18" y2="24" stroke="black" stroke-width="3"/></svg>') 12 12, crosshair !important;
 }
 
 /* Mode déplacement de calque */

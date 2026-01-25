@@ -1014,6 +1014,11 @@ debugCursor() {
             // Sélectionner automatiquement l'outil déplacer calque/vue
             setTimeout(() => {
                 this.setMode('layer-move');
+                
+                // Si c'est un import de drone, afficher la modale d'alignement avec le bouton de validation
+                if (this.state.isDroneImport && this.uiManager) {
+                    this.uiManager.showAlignmentGuideModal();
+                }
             }, 100);
             
             document.dispatchEvent(new CustomEvent('update-all-projections'));
@@ -1023,7 +1028,7 @@ debugCursor() {
         }
 
         handleScale(pixels) {
-            let realDistanceMeters, baseScaleDenominator, finalScaleDenominator;
+            let realDistanceMeters;
 
             // Logique manuelle existante
             const realDistanceMetersStr = prompt("Distance réelle en mètres pour cette ligne ?");
@@ -1034,8 +1039,92 @@ debugCursor() {
                 return;
             }
 
+            if (this.state.isDroneImport) {
+                // LOGIQUE SPÉCIFIQUE DRONE (CALQUE SUPPLÉMENTAIRE)
+                // 1. Calculer la résolution de l'image drone actuelle (pixels / mètre)
+                const dronePixelsPerMeter = pixels / realDistanceMeters;
+                
+                // 2. Récupérer la résolution du projet (pixels / mètre)
+                // state.scaleInfo.ratio est en pixels/cm, donc on multiplie par 100
+                const projectPixelsPerMeter = this.state.scaleInfo.ratio * 100;
+                
+                if (!projectPixelsPerMeter) {
+                    alert("Erreur: L'échelle du projet n'est pas définie. Impossible de calibrer le drone.");
+                    return;
+                }
+
+                // 3. Calculer le facteur d'échelle nécessaire pour que l'image drone matche le projet
+                // Si le drone a 10 px/m et le projet 100 px/m, il faut grossir l'image drone par 10 (100/10)
+                const scaleFactor = projectPixelsPerMeter / dronePixelsPerMeter;
+                
+                console.log(`🚁 [DRONE CALIBRATION]
+                    - Distance mesurée: ${realDistanceMeters}m (${pixels}px)
+                    - Résolution Drone: ${dronePixelsPerMeter.toFixed(2)} px/m
+                    - Résolution Projet: ${projectPixelsPerMeter.toFixed(2)} px/m
+                    - Facteur d'échelle à appliquer: ${scaleFactor.toFixed(4)}
+                `);
+
+                // 4. Appliquer l'échelle au calque actif (qui est le calque drone)
+                const activeLayer = this.state.getActiveLayer();
+                if (activeLayer && activeLayer.fabricCanvas) {
+                    // On applique le scale factor à l'image de fond du canvas du calque
+                    // Note: layerManager.createLayer met l'image en backgroundImage
+                    const bgImage = activeLayer.fabricCanvas.backgroundImage;
+                    if (bgImage) {
+                        // Multiplier l'échelle actuelle par le nouveau facteur
+                        // (Important car l'image peut déjà être redimensionnée)
+                        const currentScaleX = bgImage.scaleX || 1;
+                        const currentScaleY = bgImage.scaleY || 1;
+                        
+                        bgImage.scaleX = currentScaleX * scaleFactor;
+                        bgImage.scaleY = currentScaleY * scaleFactor;
+                        
+                        // Recentrer l'image si nécessaire ou laisser tel quel
+                        activeLayer.fabricCanvas.requestRenderAll();
+                        
+                        // Mettre à jour la taille du wrapper du calque si nécessaire ?
+                        // En général createLayer fixe la taille du canvas à la taille de l'image.
+                        // Si on scale l'image, le canvas risque d'être trop petit ou trop grand.
+                        // Pour les calques supplémentaires, le canvas a généralement la taille de l'image scalée.
+                        // On devrait peut-être redimensionner le canvas du calque.
+                        
+                        const newWidth = bgImage.width * bgImage.scaleX;
+                        const newHeight = bgImage.height * bgImage.scaleY;
+                        
+                        activeLayer.fabricCanvas.setWidth(newWidth);
+                        activeLayer.fabricCanvas.setHeight(newHeight);
+
+                        console.log(`🚁 [DRONE CALIBRATION] Nouvelle taille image: ${newWidth}x${newHeight}`);
+
+                        // ✅ FIX : Marquer le calque drone comme calibré pour activer les poignées
+                        activeLayer.droneScaleCalibrated = true;
+                        console.log('✅ Calque drone marqué comme calibré - poignées activées');
+                        console.log('🔍 [DEBUG] activeLayer.droneScaleCalibrated:', activeLayer.droneScaleCalibrated);
+                        console.log('🔍 [DEBUG] activeLayer.name:', activeLayer.name);
+
+                        // ✅ FIX : Déclencher l'affichage des poignées
+                        console.log('🔍 [DEBUG] Dispatch événement drone-scale-calibrated');
+                        document.dispatchEvent(new CustomEvent('drone-scale-calibrated'));
+                        console.log('✅ Événement drone-scale-calibrated dispatché');
+                    }
+                }
+
+                this.state.isDroneImport = false;
+                this.resetScaleDrawingState();
+                this.setMode('layer-move'); // Mode déplacement de calque pour pouvoir déplacer/roter la vue drone
+
+                // ✅ FIX : S'assurer que l'UI est correctement mise à jour après le changement de mode
+                document.dispatchEvent(new CustomEvent('update-ui-tools-state'));
+
+                alert("Vue drone calibrée ! Vous pouvez maintenant la déplacer et la faire pivoter pour l'aligner avec le plan.");
+                return;
+            }
+
+            // ... Suite de la logique standard pour le calque de base ...
+            const currentRatio = pixels / (realDistanceMeters * 100);
+            
             const baseScaleDenominatorStr = prompt("Veuillez entrer l'échelle de base de votre plan (ex: 500 pour 1:500).\nCeci est nécessaire pour le calibrage.", "500");
-            baseScaleDenominator = parseFloat(baseScaleDenominatorStr);
+            const baseScaleDenominator = parseFloat(baseScaleDenominatorStr);
             if (isNaN(baseScaleDenominator) || baseScaleDenominator <= 0) {
                 alert("Entrée invalide pour l'échelle de base.");
                 this.resetScaleDrawingState();
@@ -1043,7 +1132,7 @@ debugCursor() {
             }
 
             const finalScaleDenominatorStr = prompt("Quelle sera l'échelle finale de votre plan (ex: 200 pour 1:200) ?", "200");
-            finalScaleDenominator = parseFloat(finalScaleDenominatorStr);
+            const finalScaleDenominator = parseFloat(finalScaleDenominatorStr);
             if (isNaN(finalScaleDenominator) || finalScaleDenominator <= 0) {
                 alert("Entrée invalide pour l'échelle finale.");
                 this.resetScaleDrawingState();
@@ -1051,7 +1140,7 @@ debugCursor() {
             }
 
             // Calculer le ratio fondamental basé sur la ligne tracée
-            this.state.scaleInfo.ratio = pixels / (realDistanceMeters * 100);
+            this.state.scaleInfo.ratio = currentRatio;
             this.state.scaleInfo.userDefinedScaleDenominator = baseScaleDenominator;
             this.state.scaleInfo.finalScaleDenominator = finalScaleDenominator;
             
@@ -1874,20 +1963,26 @@ debugCursor() {
             });
         }
 
-        addCarToCanvas(widthM, lengthM, letter, color = '#000000', thickness = 2) {
-            console.log('🚗 DEBUT addCarToCanvas - widthM:', widthM, 'lengthM:', lengthM, 'letter:', letter, 'color:', color, 'thickness:', thickness);
+        addCarToCanvas(widthM, lengthM, letter, color = '#000000', thickness = 2, dashed = false) {
+            console.log('🚗 DEBUT addCarToCanvas - widthM:', widthM, 'lengthM:', lengthM, 'letter:', letter, 'color:', color, 'thickness:', thickness, 'dashed:', dashed);
             const canvas = this.state.getActiveCanvas();
             if(!canvas) {
                 console.log('❌ Pas de canvas actif dans addCarToCanvas');
                 return;
             }
             console.log('✅ Canvas actif trouvé:', canvas.id || 'canvas principal');
-            
+
             // CORRECTION: Soustraire l'épaisseur du trait pour que la dimension VISUELLE (trait inclus) soit exacte
             const widthPx = (widthM * 100 * this.state.scaleInfo.ratio) - thickness;
             const lengthPx = (lengthM * 100 * this.state.scaleInfo.ratio) - thickness;
-            
-            const commonProps = { stroke: color, strokeWidth: thickness, originX: 'left', originY: 'top' };
+
+            const commonProps = {
+                stroke: color,
+                strokeWidth: thickness,
+                originX: 'left',
+                originY: 'top',
+                ...(dashed ? { strokeDashArray: [10, 5] } : {})
+            };
             const vehicleId = 'vehicle_' + Date.now();
 
             const vehicleBody = new fabric.Rect({ width: lengthPx, height: widthPx, fill: 'rgba(255,255,255,1.0)', ...commonProps });
@@ -2100,6 +2195,9 @@ debugCursor() {
                     opacity: 1 !important;
                     position: relative !important;
                     z-index: 9999 !important;
+                    order: 1 !important;
+                    margin-left: 0 !important;
+                    margin-right: auto !important;
                 }
 
                 #project-tools button {
@@ -2127,6 +2225,14 @@ debugCursor() {
                 #btn-new-project * {
                     cursor: inherit !important;
                     pointer-events: none !important;
+                }
+
+                /* Force le titre Projet en blanc - RÈGLE FINALE POUR PRIORITÉ MAXIMALE */
+                html body header.toolbar div.permanent-tools#project-tools > strong,
+                html body .toolbar .tool-group > strong,
+                #project-tools > strong,
+                .toolbar .tool-group strong {
+                    color: #ffffff !important;
                 }
             `;
 
