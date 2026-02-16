@@ -23,7 +23,10 @@
             if (!drawingLayer) return;
 
             const canvas = drawingLayer.fabricCanvas;
-            
+
+            // 🚫 Bloquer les sauvegardes undo pendant la mise à jour des projections
+            this.state.isUpdatingProjections = true;
+
             // Sauvegarder les positions personnalisées des éléments de projection
             const customPositions = new Map();
             canvas.getObjects().forEach(obj => {
@@ -58,9 +61,32 @@
                 }
             });
             
-            // Nettoyer les anciennes projections (sauf les mesures)
+            // Nettoyer les anciennes projections (sauf les mesures et les éléments déplacés manuellement dont le véhicule n'a PAS bougé)
             this.state.isCleaningUpProjections = true;
-            canvas.getObjects().filter(o => o.isProjectionElement && !o.isMeasurement).forEach(o => canvas.remove(o));
+            canvas.getObjects().filter(o => {
+                // Garder les mesures qui ne sont pas des projections
+                if (!o.isProjectionElement) return false;
+                // Garder les mesures de type "measurement" (abscisses/ordonnées)
+                if (o.isMeasurement) return false;
+
+                // Si c'est une projection déplacée manuellement, vérifier si son véhicule a bougé
+                if (o.hasBeenMoved && o.projectionVehicleId) {
+                    // Trouver le véhicule associé
+                    const associatedVehicle = canvas.getObjects().find(v =>
+                        v.isVehicle && v.id === o.projectionVehicleId
+                    );
+                    // Si le véhicule vient de bouger, supprimer la mesure (return true = à supprimer)
+                    // Sinon, la garder (return false = à garder)
+                    if (associatedVehicle && associatedVehicle.hasJustMoved) {
+                        console.log(`🗑️ [PROJECTIONS] Suppression de la mesure déplacée car son véhicule a bougé: ${o.projectionId}_${o.projectionRole}`);
+                        return true; // Supprimer cette mesure
+                    }
+                    return false; // Garder cette mesure
+                }
+
+                // Supprimer les autres projections (lignes, etc)
+                return true;
+            }).forEach(o => canvas.remove(o));
             this.state.isCleaningUpProjections = false;
 
             const baseline = canvas.getObjects().find(o => o.isBaseline);
@@ -92,6 +118,9 @@
             // Réorganiser les objets et rendre
             this.reorderObjectsOnCanvas(canvas);
             canvas.renderAll();
+
+            // ✅ Réactiver les sauvegardes undo après la mise à jour des projections
+            this.state.isUpdatingProjections = false;
         }
 
         resolveGlobalOverlaps(abscissaTexts) {

@@ -18,6 +18,7 @@
             this.isPanning = false;
             this.isCleaningUpProjections = false;
             this.isCleaningUpMeasure = false;
+            this.isUpdatingProjections = false;
             this.clipboard = null;
             this.workflowState = 'start';
             this.isLoadingState = false;
@@ -26,6 +27,8 @@
             this.isDraggingSelection = false;
             this.isCreatingCurve = false;
             this.isModifyingControlPoint = false;
+            this.isModifyingVehicle = false; // 🚗 Flag pour modifications de véhicules (déplacement/rotation)
+            this.isSavingVehicle = false; // 🚗 Flag pour indiquer qu'une sauvegarde de véhicule est en cours
             this.hasPendingCurveSave = false;
             this.selectionStartPoint = { x: 0, y: 0 };
             this.selectionBox = null;

@@ -288,7 +288,13 @@
             canvas.on('object:moving', (e) => {
                 if (this.state.isLoadingState) return;
                 const obj = e.target;
-                
+
+                // 🚗 Marquer le début de modification pour les véhicules
+                if (obj.isVehicle && !this.state.isModifyingVehicle) {
+                    this.state.isModifyingVehicle = true;
+                    console.log('🚗 [VEHICLE] Début modification véhicule (déplacement)');
+                }
+
                 // Marquer les points de contrôle comme étant déplacés
                 if (obj.isControlPoint) {
                     obj.isBeingDragged = true;
@@ -300,8 +306,32 @@
                 if (obj.isProjectionElement && (obj.projectionRole === 'ordinate' || obj.projectionRole === 'abscissa')) {
                     obj.hasBeenMoved = true;
                 }
-                
+
                 this.handleObjectMoving(canvas, e);
+            });
+
+            // 🚗 Événement pour la rotation d'objets
+            canvas.on('object:rotating', (e) => {
+                if (this.state.isLoadingState) return;
+                const obj = e.target;
+
+                // Marquer le début de modification pour les véhicules
+                if (obj.isVehicle && !this.state.isModifyingVehicle) {
+                    this.state.isModifyingVehicle = true;
+                    console.log('🚗 [VEHICLE] Début modification véhicule (rotation)');
+                }
+            });
+
+            // 🚗 Événement pour le redimensionnement (peut être déclenché par certains contrôles)
+            canvas.on('object:scaling', (e) => {
+                if (this.state.isLoadingState) return;
+                const obj = e.target;
+
+                // Marquer le début de modification pour les véhicules
+                if (obj.isVehicle && !this.state.isModifyingVehicle) {
+                    this.state.isModifyingVehicle = true;
+                    console.log('🚗 [VEHICLE] Début modification véhicule (scaling)');
+                }
             });
 
             canvas.on('object:modified', (e) => {
@@ -328,6 +358,52 @@
                 } else if (obj.type === 'path' && obj.controlHandle) {
                     console.log('🎯 [CURVE DEBUG] Modification courbe liée - pas de sauvegarde automatique');
                     this.handleObjectModified(canvas, e, null); // Pas de sauvegarde pour les courbes
+                } else if (obj.isVehicle) {
+                    // 🚗 Pour les véhicules : gérer la fin de modification et forcer une seule sauvegarde
+                    console.log('🚗 [VEHICLE] Fin modification véhicule - préparation sauvegarde unique');
+
+                    // Vérifier si une sauvegarde est déjà programmée pour éviter les doublons
+                    if (obj.vehicleSaveTimeout) {
+                        console.log('🚗 [VEHICLE] Sauvegarde déjà programmée, abandon du deuxième appel');
+                        return;
+                    }
+
+                    // Marquer le véhicule comme venant de bouger pour les projections
+                    obj.hasJustMoved = true;
+                    setTimeout(() => {
+                        obj.hasJustMoved = false;
+                    }, 300);
+
+                    // Appeler handleObjectModified mais sans sauvegarde automatique
+                    // (le flag isModifyingVehicle est encore actif pour bloquer les sauvegardes)
+                    this.handleObjectModified(canvas, e, null);
+
+                    // Forcer une seule sauvegarde avec délai suffisant pour que tous les events asynchrones soient traités
+                    obj.vehicleSaveTimeout = setTimeout(() => {
+                        // Nettoyer la référence
+                        obj.vehicleSaveTimeout = null;
+
+                        console.log('🚗 [VEHICLE] Exécution sauvegarde différée - isModifyingVehicle avant:', this.state.isModifyingVehicle, 'isUpdatingProjections:', this.state.isUpdatingProjections);
+
+                        const layer = this.state.layers.find(l => l.fabricCanvas === canvas);
+                        if (layer && this.layerManager.undoRedoManager) {
+                            // Activer le flag pour bloquer les autres appels
+                            this.state.isSavingVehicle = true;
+
+                            // Désactiver isModifyingVehicle AVANT d'appeler forceSave pour ne pas bloquer la sauvegarde
+                            this.state.isModifyingVehicle = false;
+
+                            // Passer true pour autoriser cette sauvegarde même si isSavingVehicle est true
+                            this.layerManager.undoRedoManager.forceSave(canvas, layer, true);
+                            console.log('🚗 [VEHICLE] Sauvegarde unique exécutée');
+
+                            // Désactiver isSavingVehicle après un court délai
+                            setTimeout(() => {
+                                this.state.isSavingVehicle = false;
+                                console.log('🚗 [VEHICLE] Flag isSavingVehicle réinitialisé:', this.state.isSavingVehicle);
+                            }, 100);
+                        }
+                    }, 300); // Délai de 300ms pour attendre tous les events asynchrones
                 } else {
                     this.handleObjectModified(canvas, e, saveCurrentState);
                 }
@@ -346,18 +422,15 @@
                 }
                 
                 console.log(`🔄 object:moved détecté - Type: ${obj.type}, isVehicle: ${!!obj.isVehicle}, isProjectionElement: ${!!obj.isProjectionElement}, projectionRole: ${obj.projectionRole || 'none'}`);
-                
+
                 if (obj.isVehicle) {
-                    // Marquer le véhicule comme venant de bouger
-                    obj.hasJustMoved = true;
-                    console.log(`🚗 Véhicule ${obj.id} marqué comme ayant bougé`);
-                    // Déclencher la mise à jour des projections
-                    document.dispatchEvent(new CustomEvent('update-all-projections'));
-                    // Réinitialiser le flag après un court délai
-                    setTimeout(() => {
-                        obj.hasJustMoved = false;
-                        console.log(`🚗 Flag hasJustMoved réinitialisé pour ${obj.id}`);
-                    }, 100);
+                    // 🚗 Pour les véhicules, ne rien faire ici - c'est géré dans object:modified
+                    // Évite les doubles mises à jour des projections
+                    console.log(`🚗 Véhicule ${obj.id} - déplacement noté, gestion dans object:modified`);
+                } else if (obj.isProjectionElement && (obj.projectionRole === 'ordinate' || obj.projectionRole === 'abscissa')) {
+                    // Marquer les éléments de projection comme ayant été déplacés manuellement
+                    obj.hasBeenMoved = true;
+                    console.log(`📏 Projection ${obj.projectionRole} marquée comme déplacée pour ${obj.projectionId}`);
                 } else if (obj.isProjectionElement && (obj.projectionRole === 'ordinate' || obj.projectionRole === 'abscissa')) {
                     // Marquer les éléments de projection comme ayant été déplacés manuellement
                     obj.hasBeenMoved = true;
@@ -1488,9 +1561,23 @@ setupSelectionEvents(canvas) {
         isControlPointModification,
         isCurvePathModification,
         objectType: obj?.type,
-        objectIsControlPoint: obj?.isControlPoint
+        objectIsControlPoint: obj?.isControlPoint,
+        isProjectionElement: obj?.isProjectionElement,
+        isVehicle: obj?.isVehicle
     });
-    
+
+    // 🚫 NOUVEAU : Ne pas sauvegarder si c'est un élément de projection (déplacé manuellement par l'utilisateur)
+    if (obj && obj.isProjectionElement) {
+        console.log('📏 [PROJECTIONS] Déplacement manuel de mesure - Sauvegarde undo bloquée');
+        return;
+    }
+
+    // 🚫 NOUVEAU : Ne pas sauvegarder ici pour les véhicules (c'est géré dans object:modified)
+    if (obj && obj.isVehicle) {
+        console.log('🚗 [VEHICLE] Sauvegarde bloquée dans handleObjectModified - gérée par object:modified');
+        return;
+    }
+
     if (!this.state.isDrawing && !isInDrawingMode && !this.state.isCreatingCurve && !isControlPointModification && !isCurvePathModification) {
         console.log('🎯 [FORCE SAVE DEBUG] Conditions remplies - ForceSave déclenché');
         const layer = this.state.layers.find(l => l.fabricCanvas === canvas);
@@ -1627,11 +1714,12 @@ setupSelectionEvents(canvas) {
     // MAIS pas pendant que nous sommes en train de dessiner OU dans un mode de dessin (pour éviter les doublons)
     const isInDrawingMode = ['draw', 'arrow', 'circle', 'curve', 'scale', 'measure', 'baseline'].includes(this.state.currentMode);
     const layer = this.state.layers.find(l => l.fabricCanvas === canvas);
-    if (layer && this.layerManager.undoRedoManager && !this.state.isDrawing && !isInDrawingMode && !this.state.isCreatingCurve && !this.state.isModifyingControlPoint) {
-        console.log('🎯 [REMOVE DEBUG] ForceSave après suppression');
+    console.log('🗑️ [REMOVE DEBUG] Vérification sauvegarde après suppression - isModifyingVehicle:', this.state.isModifyingVehicle, 'isUpdatingProjections:', this.state.isUpdatingProjections, 'isDrawing:', this.state.isDrawing, 'isInDrawingMode:', isInDrawingMode);
+    if (layer && this.layerManager.undoRedoManager && !this.state.isDrawing && !isInDrawingMode && !this.state.isCreatingCurve && !this.state.isModifyingControlPoint && !this.state.isModifyingVehicle && !this.state.isUpdatingProjections) {
+        console.log('🎯 [REMOVE DEBUG] ForceSave après suppression - autorisé');
         this.layerManager.undoRedoManager.forceSave(canvas, layer);
     } else {
-        console.log('🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin ou modification point contrôle');
+        console.log('🎯 [REMOVE DEBUG] ForceSave suppression bloqué - création courbe, mode dessin, modification point contrôle, véhicule ou projections');
     }
     
     // Mettre à jour l'état des contrôles des repères si un repère a été supprimé

@@ -17,21 +17,33 @@
 
     saveState(canvas, layer, forceImmediate = false) {
         if (!canvas || !layer || this.state.isLoadingState) return;
-        
+
         // ✅ NOUVEAU : Ne pas sauvegarder pendant la création de courbe
         if (this.state.isCreatingCurve && !forceImmediate) {
             console.log('🎯 [CURVE DEBUG] Sauvegarde bloquée - création courbe en cours');
             return;
         }
-        
+
         // ✅ MODIFIÉ : Ne pas sauvegarder pendant le dessin SAUF si c'est forcé
         if (this.state.isDrawing && !forceImmediate) {
             this.pendingSave = true;
             return;
         }
-        
+
         // ✅ NOUVEAU : Pendant un déplacement aux flèches, ne pas sauvegarder
         if (this.isArrowKeyOperation && !forceImmediate) {
+            return;
+        }
+
+        // ✅ NOUVEAU : Ne pas sauvegarder pendant la mise à jour des projections des véhicules
+        if (this.state.isUpdatingProjections && !forceImmediate) {
+            console.log('🚗 [PROJECTIONS] Sauvegarde bloquée - mise à jour des projections en cours');
+            return;
+        }
+
+        // 🚗 NOUVEAU : Ne pas sauvegarder pendant la modification de véhicules (déplacement/rotation)
+        if (this.state.isModifyingVehicle && !forceImmediate) {
+            console.log('🚗 [VEHICLE] Sauvegarde bloquée - modification véhicule en cours');
             return;
         }
         
@@ -54,15 +66,19 @@
 
     performSave(canvas, layer) {
         if (!canvas || !layer || this.state.isLoadingState) return;
-        
+
         this.lastSaveTime = Date.now();
         this.pendingSave = false;
-        
+
         // Debug détaillé avec stack trace
         const stack = new Error().stack.split('\n').slice(1, 4).map(line => line.trim()).join(' → ');
-        console.log('🔍 [UNDO DEBUG] ═══ SAUVEGARDE ═══');
+        console.log('🔍 [UNDO DEBUG] ═══ SAUVEGARDE PERFORM ═══');
         console.log('🔍 [UNDO DEBUG] Stack:', stack);
         console.log('🔍 [UNDO DEBUG] isDrawing:', this.state.isDrawing);
+        console.log('🔍 [UNDO DEBUG] isModifyingVehicle:', this.state.isModifyingVehicle);
+        console.log('🔍 [UNDO DEBUG] isUpdatingProjections:', this.state.isUpdatingProjections);
+        console.log('🔍 [UNDO DEBUG] isSavingVehicle:', this.state.isSavingVehicle);
+        console.log('🔍 [UNDO DEBUG] Pile undo avant:', layer.undoStack.length);
         console.log('🔍 [UNDO DEBUG] currentMode:', this.state.currentMode);
         
         // Vider la pile redo quand on fait une nouvelle action
@@ -135,19 +151,42 @@
         }
     }
 
-    forceSave(canvas, layer) {
+    forceSave(canvas, layer, allowDuringVehicleSave = false) {
         // BYPASS complet de la logique de comparaison pour forcer la sauvegarde
         // MAIS pas pendant le remplissage pour éviter les sauvegardes multiples
         if (!canvas || !layer || this.state.isLoadingState) return;
-        
+
         // Ne pas forcer pendant le mode fill pour éviter les sauvegardes multiples
         if (this.state.currentMode === 'fill') return;
-        
+
         // ✅ NOUVEAU : Ne pas forcer pendant la création de courbe
         if (this.state.isCreatingCurve) {
             console.log('🎯 [CURVE DEBUG] ForceSave bloquée - création courbe en cours');
             return;
         }
+
+        // 🚗 NOUVEAU : Ne pas forcer pendant la modification de véhicules
+        if (this.state.isModifyingVehicle) {
+            console.log('🚗 [VEHICLE] ForceSave bloquée - modification véhicule en cours');
+            return;
+        }
+
+        // 🚗 NOUVEAU : Ne pas forcer pendant la mise à jour des projections
+        if (this.state.isUpdatingProjections) {
+            console.log('🚗 [PROJECTIONS] ForceSave bloquée - mise à jour projections en cours');
+            return;
+        }
+
+        // 🚗 NOUVEAU : Si une sauvegarde de véhicule est déjà en cours, ne pas en ajouter une autre
+        // SAUF si allowDuringVehicleSave est true (appel autorisé)
+        if (this.state.isSavingVehicle && !allowDuringVehicleSave) {
+            console.log('🚗 [VEHICLE] ForceSave bloquée - sauvegarde de véhicule déjà en cours');
+            return;
+        }
+
+        console.log('💪 [FORCE SAVE] ForceSave exécuté - isModifyingVehicle:', this.state.isModifyingVehicle, 'isUpdatingProjections:', this.state.isUpdatingProjections, 'isSavingVehicle:', this.state.isSavingVehicle, 'allowDuringVehicleSave:', allowDuringVehicleSave);
+        const stack = new Error().stack.split('\n').slice(1, 4).map(line => line.trim()).join(' → ');
+        console.log('💪 [FORCE SAVE] Stack:', stack);
         
         this.lastSaveTime = Date.now();
         this.pendingSave = false;
@@ -168,14 +207,16 @@
         });
         
         const cleanState = { ...state, objects: filteredObjects };
-        
+
         // FORCER la sauvegarde SANS comparaison
+        console.log(`💾 [FORCE SAVE] AJOUT à la pile undo - taille avant: ${layer.undoStack.length}`);
         layer.undoStack.push(cleanState);
-        
+        console.log(`💾 [FORCE SAVE] AJOUT effectué - taille après: ${layer.undoStack.length}`);
+
         if (layer.undoStack.length > this.maxHistorySize) {
             layer.undoStack.shift();
         }
-        
+
         console.log(`💾 [FORCE SAVE] État forcé - Pile undo: ${layer.undoStack.length} états`);
         layer.undoStack.forEach((state, index) => {
             console.log(`  [${index}] ${state.objects.length} objets`);
@@ -223,16 +264,38 @@
         prevState.objects?.forEach((obj, i) => {
             console.log(`  État[${i}] ${obj.type} - visible:${obj.visible} - left:${obj.left} top:${obj.top}`);
         });
-        
+
+        // 🎯 NOUVEAU : Sauvegarder les objets de mesure déplacés manuellement AVANT loadFromJSON
+        // loadFromJSON va vider le canvas, on doit donc garder les objets réels pour les remettre après
+        const manuallyMovedProjections = [];
+        canvas.getObjects().forEach(obj => {
+            if (obj.isProjectionElement && obj.hasBeenMoved && obj.projectionId) {
+                const key = obj.projectionId + '_' + obj.projectionRole;
+                console.log(`🔒 [UNDO] Sauvegarde de la mesure déplacée: ${key} à (${obj.left.toFixed(1)}, ${obj.top.toFixed(1)})`);
+                // Cloner l'objet pour le remettre après loadFromJSON
+                const cloned = fabric.util.object.clone(obj);
+                cloned.hasBeenMoved = true; // S'assurer que le flag est conservé
+                manuallyMovedProjections.push(cloned);
+            }
+        });
+
         canvas.loadFromJSON(prevState, () => {
             console.log('🔄 [UNDO DEBUG] Après restauration - objets restaurés:', canvas.getObjects().length);
+
+            // 🎯 NOUVEAU : Remettre les mesures déplacées manuellement sur le canvas
+            manuallyMovedProjections.forEach(cloned => {
+                const key = cloned.projectionId + '_' + cloned.projectionRole;
+                console.log(`🔄 [UNDO] Restauration de la mesure déplacée: ${key} à (${cloned.left.toFixed(1)}, ${cloned.top.toFixed(1)})`);
+                canvas.add(cloned);
+            });
+
             canvas.getObjects().forEach((obj, i) => {
                 console.log(`  Restauré[${i}] ${obj.type} - visible:${obj.visible} - left:${obj.left} top:${obj.top}`);
             });
             canvas.renderAll();
             this.finishUndoRedoOperation();
         });
-        
+
         return true;
     }
 
@@ -261,11 +324,32 @@
         // L'ajouter à la pile undo
         layer.undoStack.push(nextState);
 
+        // 🎯 NOUVEAU : Sauvegarder les objets de mesure déplacés manuellement AVANT loadFromJSON
+        // loadFromJSON va vider le canvas, on doit donc garder les objets réels pour les remettre après
+        const manuallyMovedProjections = [];
+        canvas.getObjects().forEach(obj => {
+            if (obj.isProjectionElement && obj.hasBeenMoved && obj.projectionId) {
+                const key = obj.projectionId + '_' + obj.projectionRole;
+                console.log(`🔒 [REDO] Sauvegarde de la mesure déplacée: ${key} à (${obj.left.toFixed(1)}, ${obj.top.toFixed(1)})`);
+                // Cloner l'objet pour le remettre après loadFromJSON
+                const cloned = fabric.util.object.clone(obj);
+                cloned.hasBeenMoved = true; // S'assurer que le flag est conservé
+                manuallyMovedProjections.push(cloned);
+            }
+        });
+
         canvas.loadFromJSON(nextState, () => {
+            // 🎯 NOUVEAU : Remettre les mesures déplacées manuellement sur le canvas
+            manuallyMovedProjections.forEach(cloned => {
+                const key = cloned.projectionId + '_' + cloned.projectionRole;
+                console.log(`🔄 [REDO] Restauration de la mesure déplacée: ${key} à (${cloned.left.toFixed(1)}, ${cloned.top.toFixed(1)})`);
+                canvas.add(cloned);
+            });
+
             canvas.renderAll();
             this.finishUndoRedoOperation();
         });
-        
+
         return true;
     }
 
