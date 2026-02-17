@@ -2012,22 +2012,24 @@ debugCursor() {
                 id: vehicleId,
                 suppressedCorners: []
             });
-            
+
             console.log('🚗 Ajout du véhicule au canvas...');
             canvas.add(car).setActiveObject(car);
             console.log('✅ Véhicule ajouté au canvas');
-            
+
             console.log('🚗 Sauvegarde état pour undo/redo...');
             this.layerManager.undoRedoManager.saveState(canvas, this.state.getActiveLayer());
-            
-            
+
+
             console.log('🚗 Dispatch des événements...');
+            // 🚗 CORRECTION BUG : Ne pas passer newlyAddedVehicleId pour éviter que les projections des autres véhicules disparaissent
+            // Le code normal va traiter tous les véhicules et s'assurer que toutes les projections sont correctes
             document.dispatchEvent(new CustomEvent('update-all-projections'));
             document.dispatchEvent(new CustomEvent('update-layers-panel'));
-            
+
             console.log('🚗 Retour en mode select...');
             this.setMode('select');
-            
+
             console.log('✅ addCarToCanvas TERMINÉ avec succès');
         }
 

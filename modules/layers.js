@@ -265,6 +265,11 @@
             console.log(`  État[${i}] ${obj.type} - visible:${obj.visible} - left:${obj.left} top:${obj.top}`);
         });
 
+        // 🚗 NOUVEAU : Sauvegarder les positions des véhicules AVANT loadFromJSON
+        // pour pouvoir détecter ceux qui ont été déplacés par l'undo
+        const vehiclePositionsBefore = this.getVehiclePositions(canvas);
+        console.log(`🚗 [UNDO] Positions des véhicules avant undo:`, vehiclePositionsBefore.size, 'véhicule(s)');
+
         // 🎯 NOUVEAU : Sauvegarder les objets de mesure déplacés manuellement AVANT loadFromJSON
         // loadFromJSON va vider le canvas, on doit donc garder les objets réels pour les remettre après
         const manuallyMovedProjections = [];
@@ -292,8 +297,13 @@
             canvas.getObjects().forEach((obj, i) => {
                 console.log(`  Restauré[${i}] ${obj.type} - visible:${obj.visible} - left:${obj.left} top:${obj.top}`);
             });
+
+            // 🚗 NOUVEAU : Détecter les véhicules déplacés par l'undo et réinitialiser leurs mesures
+            const movedVehicleIds = this.findMovedVehicles(vehiclePositionsBefore, canvas);
+            console.log(`🚗 [UNDO] Véhicules déplacés par l'undo:`, movedVehicleIds);
+
             canvas.renderAll();
-            this.finishUndoRedoOperation();
+            this.finishUndoRedoOperation(movedVehicleIds);
         });
 
         return true;
@@ -324,6 +334,11 @@
         // L'ajouter à la pile undo
         layer.undoStack.push(nextState);
 
+        // 🚗 NOUVEAU : Sauvegarder les positions des véhicules AVANT loadFromJSON
+        // pour pouvoir détecter ceux qui ont été déplacés par le redo
+        const vehiclePositionsBefore = this.getVehiclePositions(canvas);
+        console.log(`🚗 [REDO] Positions des véhicules avant redo:`, vehiclePositionsBefore.size, 'véhicule(s)');
+
         // 🎯 NOUVEAU : Sauvegarder les objets de mesure déplacés manuellement AVANT loadFromJSON
         // loadFromJSON va vider le canvas, on doit donc garder les objets réels pour les remettre après
         const manuallyMovedProjections = [];
@@ -346,8 +361,12 @@
                 canvas.add(cloned);
             });
 
+            // 🚗 NOUVEAU : Détecter les véhicules déplacés par le redo et réinitialiser leurs mesures
+            const movedVehicleIds = this.findMovedVehicles(vehiclePositionsBefore, canvas);
+            console.log(`🚗 [REDO] Véhicules déplacés par le redo:`, movedVehicleIds);
+
             canvas.renderAll();
-            this.finishUndoRedoOperation();
+            this.finishUndoRedoOperation(movedVehicleIds);
         });
 
         return true;
@@ -363,29 +382,74 @@
         return layer && layer.redoStack && layer.redoStack.length > 0;
     }
     
+    // Méthode utilitaire pour extraire les positions des véhicules du canvas
+    getVehiclePositions(canvas) {
+        const positions = new Map();
+        canvas.getObjects().forEach(obj => {
+            if (obj.isVehicle && obj.id) {
+                positions.set(obj.id, {
+                    left: obj.left,
+                    top: obj.top,
+                    angle: obj.angle,
+                    scaleX: obj.scaleX,
+                    scaleY: obj.scaleY
+                });
+            }
+        });
+        return positions;
+    }
+
+    // Comparer les positions avant/après pour identifier les véhicules déplacés
+    findMovedVehicles(beforePositions, afterCanvas, tolerance = 0.5) {
+        const movedVehicles = [];
+        afterCanvas.getObjects().forEach(obj => {
+            if (obj.isVehicle && obj.id && beforePositions.has(obj.id)) {
+                const before = beforePositions.get(obj.id);
+                // Vérifier si la position a changé (avec tolérance pour les erreurs de précision)
+                const leftChanged = Math.abs(before.left - obj.left) > tolerance;
+                const topChanged = Math.abs(before.top - obj.top) > tolerance;
+                const angleChanged = Math.abs(before.angle - obj.angle) > 0.1;
+                const scaleChanged = Math.abs(before.scaleX - obj.scaleX) > tolerance ||
+                                   Math.abs(before.scaleY - obj.scaleY) > tolerance;
+
+                if (leftChanged || topChanged || angleChanged || scaleChanged) {
+                    movedVehicles.push(obj.id);
+                    console.log(`🔄 [UNDO/REDO] Véhicule ${obj.id} déplacé: avant(${before.left.toFixed(1)}, ${before.top.toFixed(1)}, ${before.angle.toFixed(1)}°) → après(${obj.left.toFixed(1)}, ${obj.top.toFixed(1)}, ${obj.angle.toFixed(1)}°)`);
+                }
+            }
+        });
+        return movedVehicles;
+    }
+
     // Méthode unifiée pour finaliser les opérations undo/redo
-    finishUndoRedoOperation() {
+    finishUndoRedoOperation(movedVehicleIds = []) {
         // Utiliser requestAnimationFrame pour s'assurer que le rendu est terminé
         requestAnimationFrame(() => {
             // Vérifier les changements d'état critiques après undo/redo
             this.checkStateChangesAfterUndoRedo();
-            
+
+            // 🚗 NOUVEAU : Passer les IDs des véhicules déplacés pour réinitialiser leurs mesures
+            const eventDetail = movedVehicleIds.length > 0 ? { movedVehicleIds } : null;
+            if (movedVehicleIds.length > 0) {
+                console.log(`🚗 [UNDO/REDO] Réinitialisation des mesures pour véhicules déplacés:`, movedVehicleIds);
+            }
+
             // Mettre à jour les projections et l'interface
-            document.dispatchEvent(new CustomEvent('update-all-projections'));
-            
+            document.dispatchEvent(new CustomEvent('update-all-projections', { detail: eventDetail }));
+
             // Libérer le verrou de chargement
             this.state.isLoadingState = false;
-            
+
             // Mettre à jour l'interface utilisateur
             document.dispatchEvent(new CustomEvent('update-undo-redo-buttons'));
             document.dispatchEvent(new CustomEvent('update-layers-panel'));
-            
+
             // Mettre à jour l'état des contrôles des repères
             if (window.PlanEditor.instances?.uiManager) {
                 window.PlanEditor.instances.uiManager.updateLandmarkControlsState();
                 window.PlanEditor.instances.uiManager.updateSpecialToolsAvailability();
             }
-            
+
             console.log('✅ Opération undo/redo terminée');
         });
     }
@@ -560,6 +624,7 @@
                 scaleDenominator: options.scaleDenominator || null,
                 pixelRatio: options.pixelRatio || 1,
                 backgroundImage: image ? image.src : null, // Sauvegarder la source de l'image de fond
+                hasWhiteBackground: false, // 🟦 Fond blanc pour le calque de dessin
                 undoStack: [],
                 redoStack: []
             };
@@ -719,6 +784,25 @@
                     document.dispatchEvent(new CustomEvent('update-handles-positions', { detail: { layerId: id } }));
                 }
             }
+        }
+
+        // 🟦 NOUVEAU : Basculer le fond blanc pour le calque de dessin
+        toggleDrawingLayerWhiteBackground() {
+            const drawingLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
+            if (!drawingLayer) return;
+
+            drawingLayer.hasWhiteBackground = !drawingLayer.hasWhiteBackground;
+
+            // Appliquer ou retirer le fond blanc
+            if (drawingLayer.hasWhiteBackground) {
+                drawingLayer.wrapper.style.backgroundColor = 'white';
+                console.log('🟦 Fond blanc activé pour le calque de dessin');
+            } else {
+                drawingLayer.wrapper.style.backgroundColor = '';
+                console.log('🟦 Fond blanc désactivé pour le calque de dessin');
+            }
+
+            this.state.notifyLayersUpdated();
         }
 
 

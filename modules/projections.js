@@ -9,16 +9,16 @@
         }
 
         setupEventListeners() {
-            document.addEventListener('update-all-projections', () => {
-                this.updateAllProjections();
+            document.addEventListener('update-all-projections', (e) => {
+                this.updateAllProjections(e.detail);
             });
-            
+
             document.addEventListener('projections-update-needed', () => {
                 this.updateAllProjections();
             });
         }
 
-        updateAllProjections() {
+        updateAllProjections(eventDetail = null) {
             const drawingLayer = this.state.layers.find(l => l.name === this.state.DRAWING_LAYER_NAME);
             if (!drawingLayer) return;
 
@@ -27,64 +27,96 @@
             // 🚫 Bloquer les sauvegardes undo pendant la mise à jour des projections
             this.state.isUpdatingProjections = true;
 
+            // 🚗 SUPPRIMÉ : La logique newlyAddedVehicleId a été supprimée car elle causait un bug
+            // où les projections des véhicules existants disparaissaient lors de l'ajout d'un nouveau véhicule
+
+            // 🎯 IMPORTANT : Identifier les véhicules qui viennent d'être déplacés
+            const vehiclesToReset = new Set(); // Set de vehicleIds qui doivent être entièrement recréés
+
+            // 🚗 NOUVEAU : Gérer une liste de véhicules déplacés (pour undo/redo)
+            const movedVehicleIds = eventDetail?.movedVehicleIds || null;
+            if (movedVehicleIds && Array.isArray(movedVehicleIds) && movedVehicleIds.length > 0) {
+                movedVehicleIds.forEach(id => vehiclesToReset.add(id));
+                console.log(`🔄 [PROJECTIONS] Véhicules déplacés (undo/redo):`, movedVehicleIds, '- mesures à réinitialiser');
+            } else {
+                // 🔄 Ancien format : un seul véhicule déplacé (déplacement normal)
+                const movedVehicleId = eventDetail?.movedVehicleId || null;
+                if (movedVehicleId) {
+                    vehiclesToReset.add(movedVehicleId);
+                    console.log(`🔄 [PROJECTIONS] Véhicule ${movedVehicleId} vient d'être déplacé - mesures à réinitialiser`);
+                }
+            }
+
+            console.log(`📊 [PROJECTIONS] véhiculesToReset:`, Array.from(vehiclesToReset));
+
+            // 🎯 IMPORTANT : Identifier tous les véhicules existants pour pouvoir nettoyer les orphelins
+            const existingVehicleIds = new Set(
+                canvas.getObjects()
+                    .filter(obj => obj.isVehicle)
+                    .map(obj => obj.id)
+            );
+
             // Sauvegarder les positions personnalisées des éléments de projection
             const customPositions = new Map();
+            console.log(`📊 [PROJECTIONS] Début sauvegarde positions - vehiclesToReset:`, Array.from(vehiclesToReset));
             canvas.getObjects().forEach(obj => {
                 if (obj.isProjectionElement && obj.projectionId && obj.hasBeenMoved) {
                     // Trouver le véhicule associé
-                    const associatedVehicle = canvas.getObjects().find(v => 
+                    const associatedVehicle = canvas.getObjects().find(v =>
                         v.isVehicle && v.id === obj.projectionVehicleId
                     );
-                    
+
                     if (associatedVehicle) {
-                        // Sauvegarder la position SEULEMENT si le véhicule n'a pas bougé récemment
-                        // OU si cet appel vient d'un ajout de véhicule (pas de véhicule avec hasJustMoved)
-                        const hasAnyVehicleJustMoved = canvas.getObjects().some(v => v.isVehicle && v.hasJustMoved);
-                        
-                        // SI LE VÉHICULE ASSOCIÉ VIENT DE BOUGER, ON NE SAUVEGARDE PAS LA POSITION
-                        // Cela force la réinitialisation des mesures à leur position par défaut
-                        if (!associatedVehicle.hasJustMoved) {
-                            // On peut sauvegarder si un AUTRE véhicule a bougé, mais pas celui-ci
-                            // Ou si aucun véhicule n'a bougé (rafraîchissement global)
+                        // 🎯 Logique de sauvegarde des positions personnalisées
+                        if (!vehiclesToReset.has(associatedVehicle.id)) {
+                            // Sauvegarder la position si le véhicule n'est PAS à réinitialiser
+                            // (qu'il vienne d'être déplacé ou que ce soit un autre véhicule qui est manipulé)
                             customPositions.set(obj.projectionId + '_' + obj.projectionRole, {
                                 left: obj.left,
                                 top: obj.top,
                                 hasBeenMoved: true
                             });
+                            console.log(`💾 [PROJECTIONS] Position sauvegardée pour véhicule ${associatedVehicle.id} - projection: ${obj.projectionId}_${obj.projectionRole}`);
                         } else {
-                            // FORCAGE DE LA RÉINITIALISATION :
-                            // Si le véhicule a bougé, on ne sauvegarde RIEN dans customPositions pour ses mesures.
-                            // Ainsi, lors du redessin (drawProjectionsForVehicle), customPositions.has() renverra false,
-                            // et les positions seront recalculées par défaut.
+                            console.log(`⏭️ [PROJECTIONS] Véhicule ${associatedVehicle.id} à réinitialiser - pas de sauvegarde de position`);
                         }
                     }
                 }
             });
-            
-            // Nettoyer les anciennes projections (sauf les mesures et les éléments déplacés manuellement dont le véhicule n'a PAS bougé)
+
+            // Nettoyer les anciennes projections
             this.state.isCleaningUpProjections = true;
             canvas.getObjects().filter(o => {
-                // Garder les mesures qui ne sont pas des projections
+                // Garder les objets qui ne sont pas des projections
                 if (!o.isProjectionElement) return false;
-                // Garder les mesures de type "measurement" (abscisses/ordonnées)
-                if (o.isMeasurement) return false;
 
-                // Si c'est une projection déplacée manuellement, vérifier si son véhicule a bougé
-                if (o.hasBeenMoved && o.projectionVehicleId) {
-                    // Trouver le véhicule associé
-                    const associatedVehicle = canvas.getObjects().find(v =>
-                        v.isVehicle && v.id === o.projectionVehicleId
-                    );
-                    // Si le véhicule vient de bouger, supprimer la mesure (return true = à supprimer)
-                    // Sinon, la garder (return false = à garder)
-                    if (associatedVehicle && associatedVehicle.hasJustMoved) {
-                        console.log(`🗑️ [PROJECTIONS] Suppression de la mesure déplacée car son véhicule a bougé: ${o.projectionId}_${o.projectionRole}`);
-                        return true; // Supprimer cette mesure
-                    }
-                    return false; // Garder cette mesure
+                // 🎯 IMPORTANT : Supprimer les projections orphelines (sans véhicule associé)
+                if (o.projectionVehicleId && !existingVehicleIds.has(o.projectionVehicleId)) {
+                    console.log(`🗑️ [PROJECTIONS] Suppression projection orpheline (véhicule ${o.projectionVehicleId} n'existe plus)`);
+                    return true; // Supprimer
                 }
 
-                // Supprimer les autres projections (lignes, etc)
+                // TOUJOURS supprimer les lignes de projection
+                if (o.projectionRole === 'line') {
+                    return true; // Supprimer
+                }
+
+                // Pour les textes (abscissa/ordinate)
+                if (o.projectionRole === 'abscissa' || o.projectionRole === 'ordinate') {
+                    // Si le véhicule doit être réinitialisé, supprimer tous ses textes
+                    if (vehiclesToReset.has(o.projectionVehicleId)) {
+                        console.log(`🗑️ [PROJECTIONS] Suppression texte car véhicule ${o.projectionVehicleId} à réinitialiser`);
+                        return true; // Supprimer
+                    }
+                    // Sinon, supprimer seulement les textes non déplacés
+                    if (!o.hasBeenMoved) {
+                        return true; // Supprimer
+                    }
+                    // Garder les textes déplacés dont le véhicule n'a pas bougé
+                    return false; // Garder
+                }
+
+                // Supprimer les autres types de projections
                 return true;
             }).forEach(o => canvas.remove(o));
             this.state.isCleaningUpProjections = false;
@@ -100,10 +132,10 @@
             // Liste globale pour collecter toutes les abscisses de tous les véhicules
             const allAbscissaTexts = [];
 
-            // Traiter les véhicules
+            // 🎯 Traiter TOUS les véhicules (plus de logique newlyAddedVehicleId)
             canvas.getObjects().forEach(obj => {
                 if (obj.isVehicle) {
-                    const vehicleAbscissas = this.drawProjectionsForVehicle(obj, baseline, zeroPoint, canvas, customPositions);
+                    const vehicleAbscissas = this.drawProjectionsForVehicle(obj, baseline, zeroPoint, canvas, customPositions, vehiclesToReset);
                     allAbscissaTexts.push(...vehicleAbscissas);
                 } else if (obj.isLandmark && document.getElementById('toggle-landmark-coords-checkbox')?.checked) {
                     // Pour les repères, on peut aussi collecter les abscisses si on veut gérer les conflits avec eux
@@ -211,12 +243,60 @@
             }
         }
 
-        drawProjectionsForVehicle(vehicle, baseline, zeroPoint, canvas, customPositions = new Map()) {
+        drawProjectionsForVehicle(vehicle, baseline, zeroPoint, canvas, customPositions = new Map(), vehiclesToReset = new Set()) {
             const baselineY = baseline.top;
             const zeroPointX = zeroPoint.left;
             const projectionColor = vehicle.originalColor || 'rgba(128, 128, 128, 0.8)';
             const generatedAbscissaTexts = [];
             const generatedOrdinateTexts = [];
+            const vehicleId = vehicle.id;
+
+            // 🎯 Vérifier si ce véhicule doit être entièrement réinitialisé
+            const mustReset = vehiclesToReset.has(vehicleId);
+            if (mustReset) {
+                console.log(`🔄 [PROJECTIONS] Véhicule ${vehicleId} à réinitialiser (dans drawProjectionsForVehicle)`);
+            }
+
+            // 🎯 IMPORTANT : Collecter les textes déplacés manuellement qui existent déjà pour ce véhicule
+            // pour ne pas les recréer par la suite
+            // IMPORTANT : Ne collecter que si le véhicule N'A PAS à être réinitialisé
+            const existingMovedTexts = new Map(); // key: projectionId_role, value: objet texte
+            if (!mustReset) {
+                canvas.getObjects().forEach(obj => {
+                    if (obj.isProjectionElement &&
+                        obj.projectionVehicleId === vehicleId &&
+                        obj.hasBeenMoved &&
+                        (obj.projectionRole === 'abscissa' || obj.projectionRole === 'ordinate')) {
+                        const key = obj.projectionId + '_' + obj.projectionRole;
+                        existingMovedTexts.set(key, obj);
+                        console.log(`🔒 [PROJECTIONS] Texte déplacé existant trouvé: ${key}`);
+                    }
+                });
+            } else {
+                console.log(`🔄 [PROJECTIONS] Véhicule ${vehicleId} à réinitialiser, pas de collecte de textes existants`);
+            }
+
+            // 🎯 IMPORTANT : Supprimer les anciennes projections pour CE véhicule avant d'en créer de nouvelles
+            // Note: La plupart des projections ont déjà été nettoyées dans updateAllProjections,
+            // mais on fait un nettoyage de sécurité pour être sûr
+            canvas.getObjects().filter(obj => {
+                if (!obj.isProjectionElement || obj.projectionVehicleId !== vehicleId) {
+                    return false;
+                }
+
+                // 🎯 IMPORTANT : Si c'est un texte déplacé manuellement et que le véhicule n'est PAS à réinitialiser
+                // ne PAS le supprimer (on va le réutiliser)
+                if ((obj.projectionRole === 'abscissa' || obj.projectionRole === 'ordinate') &&
+                    obj.hasBeenMoved &&
+                    !mustReset) {
+                    console.log(`🔒 [PROJECTIONS] Préservation texte déplacé ${obj.projectionId}_${obj.projectionRole} pour véhicule ${vehicleId}`);
+                    return false; // Ne pas supprimer
+                }
+
+                // Dans tous les autres cas (lignes, textes non déplacés, textes déplacés d'un véhicule à réinitialiser), supprimer
+                console.log(`🗑️ [PROJECTIONS] Suppression projection ${obj.projectionRole} pour véhicule ${vehicleId} (mustReset=${mustReset}, hasBeenMoved=${obj.hasBeenMoved})`);
+                return true;
+            }).forEach(obj => canvas.remove(obj));
 
             vehicle.setCoords();
             const corners = vehicle.aCoords;
@@ -257,8 +337,11 @@
                         projectionRole: 'line',
                     }
                 );
-                
+
                 let ordinateText, abscissaText;
+                // Définir les clés avant le bloc conditionnel pour qu'elles soient accessibles partout
+                const ordinateKey = projectionId + '_ordinate';
+                const abscissaKey = projectionId + '_abscissa';
 
                 if (this.state.scaleInfo.ratio > 0) {
                     // Calcul de l'ordonnée (distance verticale)
@@ -278,32 +361,38 @@
                     let ordinateLeft = corner.x + 5;
                     let ordinateTop = corner.y + (baselineY - corner.y) / 2;
                     let ordinateHasBeenMoved = false;
-                    
-                    // Vérifier s'il y a une position personnalisée
-                    const ordinateKey = projectionId + '_ordinate';
-                    if (customPositions.has(ordinateKey)) {
-                        const saved = customPositions.get(ordinateKey);
-                        ordinateLeft = saved.left;
-                        ordinateTop = saved.top;
-                        ordinateHasBeenMoved = saved.hasBeenMoved;
+
+                    // 🎯 Vérifier si un texte déplacé existe déjà pour ce coin
+                    if (existingMovedTexts.has(ordinateKey)) {
+                        // Utiliser le texte existant au lieu d'en créer un nouveau
+                        ordinateText = existingMovedTexts.get(ordinateKey);
+                        console.log(`♻️ [PROJECTIONS] Réutilisation texte déplacé existant: ${ordinateKey}`);
+                    } else {
+                        // Créer un nouveau texte
+                        if (customPositions.has(ordinateKey)) {
+                            const saved = customPositions.get(ordinateKey);
+                            ordinateLeft = saved.left;
+                            ordinateTop = saved.top;
+                            ordinateHasBeenMoved = saved.hasBeenMoved;
+                        }
+
+                        ordinateText = new fabric.Text(verticalMeters, {
+                            ...commonProps,
+                            left: ordinateLeft,
+                            top: ordinateTop,
+                            fontSize: 12,
+                            fill: projectionColor,
+                            backgroundColor: 'rgba(255,255,255,1.0)',
+                            originX: 'left',
+                            originY: 'center',
+                            projectionRole: 'ordinate',
+                            hasControls: false,
+                            hasBorders: true, // Permettre la sélection et le déplacement
+                            selectable: true,
+                            moveable: true,
+                            hasBeenMoved: ordinateHasBeenMoved,
+                        });
                     }
-                    
-                    ordinateText = new fabric.Text(verticalMeters, {
-                        ...commonProps,
-                        left: ordinateLeft,
-                        top: ordinateTop,
-                        fontSize: 12,
-                        fill: projectionColor,
-                        backgroundColor: 'rgba(255,255,255,1.0)',
-                        originX: 'left',
-                        originY: 'center',
-                        projectionRole: 'ordinate',
-                        hasControls: false,
-                        hasBorders: true, // Permettre la sélection et le déplacement
-                        selectable: true,
-                        moveable: true,
-                        hasBeenMoved: ordinateHasBeenMoved,
-                    });
 
                     // Calcul de l'abscisse (distance horizontale depuis le point zéro)
                     const horizontalPixels = corner.x - zeroPointX;
@@ -325,47 +414,61 @@
                     }
 
                     let abscissaHasBeenMoved = false;
-                    
-                    // Vérifier s'il y a une position personnalisée
-                    const abscissaKey = projectionId + '_abscissa';
-                    if (customPositions.has(abscissaKey)) {
-                        const saved = customPositions.get(abscissaKey);
-                        abscissaLeft = saved.left;
-                        abscissaTop = saved.top;
-                        abscissaHasBeenMoved = saved.hasBeenMoved;
-                        // On garde l'originY par défaut sauf si on stockait aussi l'origin (ce qui n'est pas le cas ici, mais ce n'est pas grave pour le déplacement manuel)
+
+                    // 🎯 Vérifier si un texte déplacé existe déjà pour ce coin
+                    if (existingMovedTexts.has(abscissaKey)) {
+                        // Utiliser le texte existant au lieu d'en créer un nouveau
+                        abscissaText = existingMovedTexts.get(abscissaKey);
+                        console.log(`♻️ [PROJECTIONS] Réutilisation texte déplacé existant: ${abscissaKey}`);
+                    } else {
+                        // Créer un nouveau texte
+                        if (customPositions.has(abscissaKey)) {
+                            const saved = customPositions.get(abscissaKey);
+                            abscissaLeft = saved.left;
+                            abscissaTop = saved.top;
+                            abscissaHasBeenMoved = saved.hasBeenMoved;
+                            // On garde l'originY par défaut sauf si on stockait aussi l'origin (ce qui n'est pas le cas ici, mais ce n'est pas grave pour le déplacement manuel)
+                        }
+
+                        abscissaText = new fabric.Text(horizontalMeters, {
+                            ...commonProps,
+                            left: abscissaLeft,
+                            top: abscissaTop,
+                            fontSize: 12,
+                            fill: projectionColor,
+                            backgroundColor: 'rgba(255,255,255,1.0)',
+                            originX: 'center',
+                            originY: abscissaOriginY,
+                            projectionRole: 'abscissa',
+                            hasControls: false,
+                            hasBorders: true, // Permettre la sélection et le déplacement
+                            selectable: true,
+                            moveable: true,
+                            hasBeenMoved: abscissaHasBeenMoved,
+                        });
                     }
-                    
-                    abscissaText = new fabric.Text(horizontalMeters, {
-                        ...commonProps,
-                        left: abscissaLeft,
-                        top: abscissaTop,
-                        fontSize: 12,
-                        fill: projectionColor,
-                        backgroundColor: 'rgba(255,255,255,1.0)',
-                        originX: 'center',
-                        originY: abscissaOriginY,
-                        projectionRole: 'abscissa',
-                        hasControls: false,
-                        hasBorders: true, // Permettre la sélection et le déplacement
-                        selectable: true,
-                        moveable: true,
-                        hasBeenMoved: abscissaHasBeenMoved,
-                    });
                 }
 
                 // Ajouter les éléments au canvas
                 canvas.add(projectionLine);
+
                 if (ordinateText) {
-                    canvas.add(ordinateText);
+                    // N'ajouter au canvas que si ce n'est pas un texte existant
+                    if (!existingMovedTexts.has(ordinateKey)) {
+                        canvas.add(ordinateText);
+                    }
                     generatedOrdinateTexts.push({
                         textObj: ordinateText,
                         x: corner.x,
                         hasBeenMoved: ordinateText.hasBeenMoved
                     });
                 }
+
                 if (abscissaText) {
-                    canvas.add(abscissaText);
+                    // N'ajouter au canvas que si ce n'est pas un texte existant
+                    if (!existingMovedTexts.has(abscissaKey)) {
+                        canvas.add(abscissaText);
+                    }
                     generatedAbscissaTexts.push({
                         textObj: abscissaText,
                         x: corner.x,

@@ -397,6 +397,11 @@
                             this.layerManager.undoRedoManager.forceSave(canvas, layer, true);
                             console.log('🚗 [VEHICLE] Sauvegarde unique exécutée');
 
+                            // 🎯 Dispatch l'événement de mise à jour des projections avec l'ID du véhicule déplacé
+                            document.dispatchEvent(new CustomEvent('update-all-projections', {
+                                detail: { movedVehicleId: obj.id }
+                            }));
+
                             // Désactiver isSavingVehicle après un court délai
                             setTimeout(() => {
                                 this.state.isSavingVehicle = false;
@@ -1528,22 +1533,24 @@ setupSelectionEvents(canvas) {
             canvas.remove(obj);
             canvas.renderAll();
         }
-    } else if (obj && (obj.isVehicle || obj.isBaseline || obj.isZeroPoint || obj.isLandmark)) {
+    } else if (obj && (obj.isBaseline || obj.isZeroPoint || obj.isLandmark)) {
         // Réinitialiser le flag de déplacement utilisateur pour le point zéro
         if (obj.isZeroPoint) {
             obj.isBeingMovedByUser = false;
         }
-        
-        // Si c'est un véhicule, on s'assure que le flag hasJustMoved est actif
-        // pour que update-all-projections sache qu'il faut réinitialiser les mesures
-        if (obj.isVehicle) {
-            obj.hasJustMoved = true;
-            setTimeout(() => {
-                obj.hasJustMoved = false;
-            }, 200);
+
+        // 🚗 NOUVEAU : Si la ligne de base est déplacée, réinitialiser les mesures de tous les véhicules
+        let eventDetail = null;
+        if (obj.isBaseline) {
+            const allVehicles = canvas.getObjects().filter(o => o.isVehicle);
+            if (allVehicles.length > 0) {
+                const vehicleIds = allVehicles.map(v => v.id);
+                eventDetail = { movedVehicleIds: vehicleIds };
+                console.log(`🚗 [BASELINE] Ligne de base déplacée à la souris - ${vehicleIds.length} véhicule(s) à réinitialiser:`, vehicleIds);
+            }
         }
-        
-        document.dispatchEvent(new CustomEvent('update-all-projections'));
+
+        document.dispatchEvent(new CustomEvent('update-all-projections', { detail: eventDetail }));
     }
     this.reorderObjectsOnCanvas(canvas);
     canvas.renderAll();

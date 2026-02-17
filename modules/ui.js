@@ -384,6 +384,9 @@
                     drawingLayers.push(layer);
                 } else if (layer.name === "Plan rogné" || layer.name === "Image de fond") {
                     backgroundLayers.push(layer);
+                } else if (layer.name.startsWith("Vue drone")) {
+                    // Les vues drone sont traitées comme des calques supplémentaires
+                    supplementaryLayers.push(layer);
                 } else {
                     supplementaryLayers.push(layer);
                 }
@@ -400,10 +403,10 @@
             const li = document.createElement('li');
             li.className = `layer-item ${layer.id === this.state.activeLayerId ? 'active' : ''}`;
             li.dataset.id = layer.id;
-            
+
             const previewUrl = layer.fabricCanvas.toDataURL({format: 'png', quality: 0.1});
             const scaleText = layer.scaleDenominator ? ` (1:${layer.scaleDenominator})` : '';
-            
+
             // Déterminer le nom d'affichage selon le type de calque
             let displayName;
             if (layer.name === this.state.DRAWING_LAYER_NAME) {
@@ -412,24 +415,41 @@
                 // Seulement les calques de fond originaux
                 displayName = "Calque Fond";
             } else {
-                // Pour tous les autres calques (supplémentaires, y compris "Image collée"), compter combien il y en a déjà
-                const allSupplementaryLayers = this.state.layers.filter(l => 
-                    l.name !== this.state.DRAWING_LAYER_NAME && 
-                    l.name !== "Plan rogné" && 
-                    l.name !== "Image de fond"
-                );
-                const layerNumber = allSupplementaryLayers.indexOf(layer) + 1;
-                displayName = `Calque supplémentaire ${layerNumber}`;
+                // Pour les vues drone et images collées, utiliser le nom réel
+                if (layer.name.startsWith("Vue drone")) {
+                    displayName = layer.name;
+                } else {
+                    // Pour tous les autres calques (supplémentaires), compter combien il y en a déjà
+                    const allSupplementaryLayers = this.state.layers.filter(l =>
+                        l.name !== this.state.DRAWING_LAYER_NAME &&
+                        l.name !== "Plan rogné" &&
+                        l.name !== "Image de fond" &&
+                        !l.name.startsWith("Vue drone")
+                    );
+                    const layerNumber = allSupplementaryLayers.indexOf(layer) + 1;
+                    displayName = `Calque supplémentaire ${layerNumber}`;
+                }
             }
-            
+
             const deleteIconHTML = `<span class="layer-icon" data-action="delete" title="Supprimer le calque">🗑️</span>`;
             const lockIconHTML = `<span class="layer-icon" data-action="lock" title="Verrouiller/Déverrouiller">${layer.locked ? '🔒' : '🔓'}</span>`;
-            
-            const rotationControlHTML = 
+
+            // 🚁 NOUVEAU : Permettre la rotation des vues drone même quand elles sont verrouillées
+            const isDroneLayer = layer.name.startsWith("Vue drone");
+            const rotationDisabled = layer.locked && !isDroneLayer;
+
+            const rotationControlHTML =
                 `<div class="rotation-control">
                         <label>Angle:</label>
-                        <input type="number" class="rotation-input" min="0" max="360" step="1" value="${layer.angle}" ${layer.locked ? 'disabled' : ''}> °
+                        <input type="number" class="rotation-input" min="0" max="360" step="1" value="${layer.angle}" ${rotationDisabled ? 'disabled' : ''}> °
                    </div>`;
+
+            // 🟦 NOUVEAU : Case à cocher pour le fond blanc (uniquement pour le calque de dessin)
+            const whiteBackgroundControlHTML = layer.name === this.state.DRAWING_LAYER_NAME ?
+                `<div class="white-background-control">
+                    <label for="white-bg-checkbox-${layer.id}" style="cursor:pointer;" title="Activer/Désactiver le fond blanc">Fond blanc:</label>
+                    <input type="checkbox" id="white-bg-checkbox-${layer.id}" class="white-bg-checkbox" ${layer.hasWhiteBackground ? 'checked' : ''} ${layer.locked ? 'disabled' : ''}>
+                </div>` : '';
 
             li.innerHTML = `
                 <div class="layer-preview" style="background-image: url(${previewUrl})">
@@ -448,6 +468,7 @@
                         <input type="range" class="opacity-slider" min="0" max="1" step="0.01" value="${layer.opacity}" ${layer.locked ? 'disabled' : ''}>
                     </div>
                     ${rotationControlHTML}
+                    ${whiteBackgroundControlHTML}
                 </div>`;
 
             this.setupLayerItemEventListeners(li, layer);
@@ -491,7 +512,7 @@
             if (rotationInput) {
                 rotationInput.addEventListener('change', e => {
                     e.stopPropagation();
-                    
+
                     // Masquer seulement la modale d'alignement si on est en étape 2/3 (orienter le plan)
                     if (this.state.workflowState === 'scale_calibrated') {
                         const alignmentModal = document.getElementById('alignment-guide-modal');
@@ -499,7 +520,7 @@
                             alignmentModal.style.display = 'none';
                         }
                     }
-                    
+
                     let angle = parseFloat(e.target.value);
                     if (isNaN(angle)) angle = 0;
                     angle = Math.max(0, Math.min(360, angle));
@@ -507,6 +528,16 @@
                     this.layerManager.setLayerAngle(layer.id, angle);
                 });
                 rotationInput.addEventListener('click', e => e.stopPropagation());
+            }
+
+            // 🟦 NOUVEAU : Contrôle du fond blanc (uniquement pour le calque de dessin)
+            const whiteBgCheckbox = li.querySelector('.white-bg-checkbox');
+            if (whiteBgCheckbox) {
+                whiteBgCheckbox.addEventListener('change', e => {
+                    e.stopPropagation();
+                    this.layerManager.toggleDrawingLayerWhiteBackground();
+                });
+                whiteBgCheckbox.addEventListener('click', e => e.stopPropagation());
             }
 
             // Sélection du calque
@@ -710,31 +741,71 @@
             const vehicleColorInput = document.getElementById('vehicle-color-input');
             const vehicleThicknessInput = document.getElementById('vehicle-thickness-input');
             const vehicleThicknessDisplay = document.getElementById('vehicle-thickness-display');
-            
+
             console.log('🚗 Éléments modal trouvés:', !!vehicleModal, !!vehicleWidthInput, !!vehicleLengthInput, !!vehicleLetterInput, !!vehicleColorInput, !!vehicleThicknessInput);
-            
+
             // Diagnostiquer les styles CSS AVANT modification
             const computedStyle = window.getComputedStyle(vehicleModal);
             console.log('🚗 Styles CSS AVANT - display:', computedStyle.display, 'visibility:', computedStyle.visibility, 'z-index:', computedStyle.zIndex);
-            
+
+            // 🚗 NOUVEAU : Calculer la lettre automatiquement basée sur les véhicules existants
+            const nextVehicleLetter = this.getNextVehicleLetter();
+            console.log('🚗 Lettre véhicule proposée:', nextVehicleLetter);
+
             // Initialiser les valeurs par défaut
             vehicleWidthInput.value = '1.8';
             vehicleLengthInput.value = '4.5';
-            vehicleLetterInput.value = 'A';
+            vehicleLetterInput.value = nextVehicleLetter;
             vehicleColorInput.value = '#000000';
             vehicleThicknessInput.value = '2';
             vehicleThicknessDisplay.textContent = '2px';
-            
+
             vehicleModal.style.display = 'block';
             vehicleModal.style.visibility = 'visible';
             vehicleModal.style.zIndex = '9999';
             vehicleWidthInput.focus();
-            
+
             // Diagnostiquer les styles CSS APRÈS modification
             const computedStyleAfter = window.getComputedStyle(vehicleModal);
             console.log('🚗 Styles CSS APRÈS - display:', computedStyleAfter.display, 'visibility:', computedStyleAfter.visibility, 'z-index:', computedStyleAfter.zIndex);
-            
+
             console.log('✅ Modal véhicule affichée');
+        }
+
+        // 🚗 NOUVEAU : Trouver la prochaine lettre de véhicule disponible
+        getNextVehicleLetter() {
+            const usedLetters = new Set();
+
+            // Parcourir tous les calques pour trouver les lettres utilisées
+            this.state.layers.forEach(layer => {
+                const canvas = layer.fabricCanvas;
+                if (canvas) {
+                    canvas.getObjects().forEach(obj => {
+                        if (obj.isVehicle && obj.isVehicle) {
+                            // La lettre est dans le premier objet texte du groupe (lettre d'identification)
+                            obj.getObjects().forEach(child => {
+                                if (child.type === 'text' && child.text && child.text.length === 1) {
+                                    usedLetters.add(child.text.toUpperCase());
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            console.log('🚗 Lettres déjà utilisées:', Array.from(usedLetters));
+
+            // Trouver la prochaine lettre disponible
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let i = 0; i < alphabet.length; i++) {
+                if (!usedLetters.has(alphabet[i])) {
+                    return alphabet[i];
+                }
+            }
+
+            // Si toutes les lettres A-Z sont utilisées, revenir à A
+            console.log('🚗 Toutes les lettres A-Z sont utilisées, retour à A');
+            return 'A';
         }
 
         showAddLayerModal(layerType) {

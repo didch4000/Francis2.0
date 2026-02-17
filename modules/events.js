@@ -509,8 +509,9 @@
         }
 
         setupProjectionEvents() {
-            document.addEventListener('update-all-projections', () => {
-                this.updateAllProjections();
+            document.addEventListener('update-all-projections', (e) => {
+                // 🚗 NOUVEAU : Passer le détail de l'événement pour identifier les véhicules déplacés
+                this.updateAllProjections(e.detail);
             });
         }
 
@@ -835,7 +836,7 @@
                     const currentPosition = (zeroPoint.left - activeObject.left) / activeObject.width;
                     zeroPoint.baselineRelativePosition = Math.max(0, Math.min(1, currentPosition));
                 }
-                
+
                 // Repositionner le point zéro selon sa position relative
                 const newZeroLeft = activeObject.left + (zeroPoint.baselineRelativePosition * activeObject.width);
                 zeroPoint.set({
@@ -845,9 +846,25 @@
                 zeroPoint.setCoords();
             }
         }
-        
+
+        // 🚗 NOUVEAU : Passer les IDs des véhicules déplacés pour réinitialiser leurs mesures
+        let eventDetail = null;
+        if (activeObject.isVehicle) {
+            // Un seul véhicule déplacé avec les flèches
+            eventDetail = { movedVehicleId: activeObject.id };
+            console.log(`🚗 [ARROW KEYS] Véhicule ${activeObject.id} déplacé avec les flèches - mesures à réinitialiser`);
+        } else if (activeObject.isBaseline) {
+            // La ligne de base est déplacée → tous les véhicules doivent réinitialiser leurs mesures
+            const allVehicles = canvas.getObjects().filter(obj => obj.isVehicle);
+            if (allVehicles.length > 0) {
+                const vehicleIds = allVehicles.map(v => v.id);
+                eventDetail = { movedVehicleIds: vehicleIds };
+                console.log(`🚗 [ARROW KEYS] Ligne de base déplacée - ${vehicleIds.length} véhicule(s) à réinitialiser:`, vehicleIds);
+            }
+        }
+
         if (activeObject.isVehicle || activeObject.isZeroPoint || activeObject.isLandmark || activeObject.isBaseline) {
-            this.updateAllProjections();
+            this.updateAllProjections(eventDetail);
         }
         activeObject.setCoords();
         canvas.renderAll();
@@ -1303,7 +1320,12 @@ handleLoadingStateChange(isLoading) {
                 console.warn('⚠️ [LAYER] Aucun calque de fond trouvé pour récupérer l\'angle');
             }
 
-            this.layerManager.createLayer(`Image collée (1:${newLayerScale})`, fabricImage, { 
+            // Nommer le calque différemment selon si c'est une vue drone ou une image collée standard
+            const layerName = this.state.isDroneImport
+                ? `Vue drone (1:${newLayerScale})`
+                : `Image collée (1:${newLayerScale})`;
+
+            this.layerManager.createLayer(layerName, fabricImage, { 
                 insertBelowDrawing: true,
                 width: scaledWidth,
                 height: scaledHeight,
@@ -1670,13 +1692,13 @@ handleLoadingStateChange(isLoading) {
             this.toolsManager.setMode('select');
         }
 
-        updateAllProjections() {
+        updateAllProjections(eventDetail = null) {
     // Utiliser le nouveau ProjectionManager
     if (window.PlanEditor.instances && window.PlanEditor.instances.projectionManager) {
-        window.PlanEditor.instances.projectionManager.updateAllProjections();
+        window.PlanEditor.instances.projectionManager.updateAllProjections(eventDetail);
     } else {
         // Fallback : émettre l'événement
-        document.dispatchEvent(new CustomEvent('projections-update-needed'));
+        document.dispatchEvent(new CustomEvent('projections-update-needed', { detail: eventDetail }));
     }
 }
 

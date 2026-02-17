@@ -115,6 +115,9 @@
                 } else if (layerData.name === "Plan rogné" || layerData.name === "Image de fond") {
                     // Calques de fond spécifiques
                     backgroundLayersData.push(layerData);
+                } else if (layerData.name.startsWith("Vue drone")) {
+                    // Les vues drone sont traitées comme des calques supplémentaires
+                    supplementaryLayersData.push(layerData);
                 } else {
                     // Tous les autres calques (supplémentaires, y compris "Image collée")
                     supplementaryLayersData.push(layerData);
@@ -234,10 +237,19 @@
             layer.id = layerData.id;
             layer.visible = layerData.visible !== false;
             layer.opacity = layerData.opacity !== undefined ? layerData.opacity : 1;
-            
+
+            // 🟦 NOUVEAU : Restaurer le fond blanc pour le calque de dessin
+            layer.hasWhiteBackground = layerData.hasWhiteBackground || false;
+            if (layer.hasWhiteBackground && layer.wrapper) {
+                layer.wrapper.style.backgroundColor = 'white';
+                console.log('🟦 Fond blanc restauré pour le calque:', layer.name);
+            }
+
             // Appliquer l'opacité visuellement
             if (layer.wrapper) {
                 layer.wrapper.style.opacity = layer.opacity;
+                // Appliquer la visibilité visuellement
+                layer.wrapper.style.display = layer.visible ? 'block' : 'none';
             }
 
             // Restaurer les dimensions si elles existent
@@ -438,6 +450,9 @@
                 } else if (layer.name === "Plan rogné" || layer.name === "Image de fond") {
                     // Calques de fond spécifiques
                     backgroundLayers.push(layer);
+                } else if (layer.name.startsWith("Vue drone")) {
+                    // Les vues drone sont traitées comme des calques supplémentaires
+                    supplementaryLayers.push(layer);
                 } else {
                     // Tous les autres calques (supplémentaires, y compris "Image collée")
                     supplementaryLayers.push(layer);

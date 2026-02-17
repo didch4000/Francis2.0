@@ -161,6 +161,7 @@
                     angle: layer.angle,
                     scaleDenominator: layer.scaleDenominator,
                     backgroundImage: layer.backgroundImage,
+                    hasWhiteBackground: layer.hasWhiteBackground || false, // 🟦 Sauvegarder le fond blanc
                     // Ajouter les dimensions du canvas
                     width: layer.fabricCanvas ? layer.fabricCanvas.width : null,
                     height: layer.fabricCanvas ? layer.fabricCanvas.height : null,
