@@ -336,6 +336,25 @@
 
             canvas.on('object:modified', (e) => {
                 if (this.state.isLoadingState || this.state.isCreatingCurve) return;
+
+                // ✅ NOUVEAU : Vider automatiquement la pile redo quand un objet est modifié
+                try {
+                    const layerManager = window.PlanEditor.instances?.layerManager;
+                    const stateManager = window.PlanEditor.instances?.stateManager;
+
+                    if (layerManager && stateManager) {
+                        const activeLayer = stateManager.getActiveLayer();
+                        if (activeLayer && activeLayer.fabricCanvas === canvas) {
+                            const redoBefore = activeLayer.redoStack.length;
+                            if (redoBefore > 0) {
+                                activeLayer.redoStack = [];
+                                console.log(`🗑️ [OBJECT:MODIFIED] Pile redo vidée (${redoBefore} états supprimés) - Objet modifié`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('⚠️ [OBJECT:MODIFIED] Erreur lors du vidage de la pile redo:', error);
+                }
                 
                 const obj = e.target;
                 // Ne pas sauvegarder automatiquement pour les points de contrôle de courbe ET les courbes liées
@@ -415,9 +434,29 @@
             });
 
             canvas.on('object:moved', (e) => {
-                if (this.state.isLoadingState) return;
+                if (this.state.isLoadingState || this.state.isCreatingCurve) return;
+
                 const obj = e.target;
-                
+
+                // ✅ NOUVEAU : Vider automatiquement la pile redo quand un objet est déplacé
+                try {
+                    const layerManager = window.PlanEditor.instances?.layerManager;
+                    const stateManager = window.PlanEditor.instances?.stateManager;
+
+                    if (layerManager && stateManager) {
+                        const activeLayer = stateManager.getActiveLayer();
+                        if (activeLayer && activeLayer.fabricCanvas === canvas) {
+                            const redoBefore = activeLayer.redoStack.length;
+                            if (redoBefore > 0) {
+                                activeLayer.redoStack = [];
+                                console.log(`🗑️ [OBJECT:MOVED] Pile redo vidée (${redoBefore} états supprimés) - Objet déplacé`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('⚠️ [OBJECT:MOVED] Erreur lors du vidage de la pile redo:', error);
+                }
+
                 // Marquer la fin du déplacement pour les points de contrôle
                 if (obj.isControlPoint) {
                     obj.isBeingDragged = false;
@@ -425,17 +464,13 @@
                     console.log('🎯 [CONTROL POINT DEBUG] Fin modification point de contrôle - sauvegarde gérée par object:modified');
                     // Ne pas sauvegarder ici car c'est géré par object:modified pour éviter les doublons
                 }
-                
+
                 console.log(`🔄 object:moved détecté - Type: ${obj.type}, isVehicle: ${!!obj.isVehicle}, isProjectionElement: ${!!obj.isProjectionElement}, projectionRole: ${obj.projectionRole || 'none'}`);
 
                 if (obj.isVehicle) {
                     // 🚗 Pour les véhicules, ne rien faire ici - c'est géré dans object:modified
                     // Évite les doubles mises à jour des projections
                     console.log(`🚗 Véhicule ${obj.id} - déplacement noté, gestion dans object:modified`);
-                } else if (obj.isProjectionElement && (obj.projectionRole === 'ordinate' || obj.projectionRole === 'abscissa')) {
-                    // Marquer les éléments de projection comme ayant été déplacés manuellement
-                    obj.hasBeenMoved = true;
-                    console.log(`📏 Projection ${obj.projectionRole} marquée comme déplacée pour ${obj.projectionId}`);
                 } else if (obj.isProjectionElement && (obj.projectionRole === 'ordinate' || obj.projectionRole === 'abscissa')) {
                     // Marquer les éléments de projection comme ayant été déplacés manuellement
                     obj.hasBeenMoved = true;
@@ -452,6 +487,26 @@
 
             canvas.on('object:removed', (e) => {
                 if (this.state.isLoadingState || this.state.isCleaningUpProjections || this.state.isCleaningUpMeasure) return;
+
+                // ✅ NOUVEAU : Vider automatiquement la pile redo quand un objet est supprimé
+                try {
+                    const layerManager = window.PlanEditor.instances?.layerManager;
+                    const stateManager = window.PlanEditor.instances?.stateManager;
+
+                    if (layerManager && stateManager) {
+                        const activeLayer = stateManager.getActiveLayer();
+                        if (activeLayer && activeLayer.fabricCanvas === canvas) {
+                            const redoBefore = activeLayer.redoStack.length;
+                            if (redoBefore > 0) {
+                                activeLayer.redoStack = [];
+                                console.log(`🗑️ [OBJECT:REMOVED] Pile redo vidée (${redoBefore} états supprimés) - Objet supprimé`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('⚠️ [OBJECT:REMOVED] Erreur lors du vidage de la pile redo:', error);
+                }
+
                 this.handleObjectRemoved(canvas, e, saveCurrentState);
             });
 			
@@ -469,6 +524,32 @@
             canvas.on('object:added', (e) => {
                 // S'assurer que le curseur reste au-dessus de tout
                 this.ensureCursorOnTop();
+
+                // ✅ CORRECTION : Vider automatiquement la pile redo quand un objet est ajouté
+                // IMPORTANT : Le faire tout le temps, sauf pendant un chargement d'état
+                if (!this.state.isLoadingState) {
+                    try {
+                        const layerManager = window.PlanEditor.instances?.layerManager;
+                        const stateManager = window.PlanEditor.instances?.stateManager;
+
+                        if (layerManager && stateManager) {
+                            const activeLayer = stateManager.getActiveLayer();
+                            if (activeLayer && activeLayer.fabricCanvas === canvas) {
+                                // Vider automatiquement la pile redo quand un nouvel objet est ajouté
+                                const redoBefore = activeLayer.redoStack.length;
+                                if (redoBefore > 0) {
+                                    activeLayer.redoStack = [];
+                                    console.log(`🗑️ [OBJECT:ADDED] Pile redo vidée (${redoBefore} états supprimés) - Nouvel objet ajouté`);
+                                    // Mettre à jour les boutons undo/redo
+                                    document.dispatchEvent(new CustomEvent('update-undo-redo-buttons'));
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        // Ne pas bloquer l'application si le vidage échoue
+                        console.warn('⚠️ [OBJECT:ADDED] Erreur lors du vidage de la pile redo:', error);
+                    }
+                }
             });
         }
 

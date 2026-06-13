@@ -2,7 +2,12 @@
 (function() {
     'use strict';
     
-    // Gestionnaire Undo/Redo
+    // ✅ Gestionnaire Undo/Redo - CORRIGÉ
+    // Corrections apportées pour résoudre les problèmes de sauvegarde/restauration :
+    // 1. Filtrage amélioré : Inclut maintenant les objets guides temporaires (lignes, textes, formes)
+    // 2. Conditions de blocage simplifiées : Réduit le risque d'interférences
+    // 3. Gestion d'erreur améliorée : Protection contre les blocages de isLoadingState
+    // 4. Logs de débogage enrichis : Meilleure traçabilité des opérations
     class UndoRedoManager {
     constructor(state) {
         this.state = state;
@@ -18,49 +23,39 @@
     saveState(canvas, layer, forceImmediate = false) {
         if (!canvas || !layer || this.state.isLoadingState) return;
 
-        // ✅ NOUVEAU : Ne pas sauvegarder pendant la création de courbe
-        if (this.state.isCreatingCurve && !forceImmediate) {
-            console.log('🎯 [CURVE DEBUG] Sauvegarde bloquée - création courbe en cours');
+        // ✅ SIMPLIFIÉ : Regrouper les conditions de blocage pour plus de clarté
+        // Ne pas sauvegarder pendant les opérations temporaires
+        const blockedOperations = [
+            this.state.isCreatingCurve && !forceImmediate,
+            this.state.isDrawing && !forceImmediate,
+            this.isArrowKeyOperation && !forceImmediate,
+            // ❌ SUPPRIMÉ : isUpdatingProjections ne doit PAS bloquer les nouvelles actions de l'utilisateur
+            // this.state.isUpdatingProjections && !forceImmediate,
+            this.state.isModifyingVehicle && !forceImmediate
+        ];
+
+        if (blockedOperations.some(condition => condition)) {
+            // Si c'est pendant le dessin, marquer pour sauvegarde ultérieure
+            if (this.state.isDrawing && !forceImmediate) {
+                this.pendingSave = true;
+            }
             return;
         }
 
-        // ✅ MODIFIÉ : Ne pas sauvegarder pendant le dessin SAUF si c'est forcé
-        if (this.state.isDrawing && !forceImmediate) {
-            this.pendingSave = true;
-            return;
-        }
-
-        // ✅ NOUVEAU : Pendant un déplacement aux flèches, ne pas sauvegarder
-        if (this.isArrowKeyOperation && !forceImmediate) {
-            return;
-        }
-
-        // ✅ NOUVEAU : Ne pas sauvegarder pendant la mise à jour des projections des véhicules
-        if (this.state.isUpdatingProjections && !forceImmediate) {
-            console.log('🚗 [PROJECTIONS] Sauvegarde bloquée - mise à jour des projections en cours');
-            return;
-        }
-
-        // 🚗 NOUVEAU : Ne pas sauvegarder pendant la modification de véhicules (déplacement/rotation)
-        if (this.state.isModifyingVehicle && !forceImmediate) {
-            console.log('🚗 [VEHICLE] Sauvegarde bloquée - modification véhicule en cours');
-            return;
-        }
-        
         // Debouncing pour éviter trop de sauvegardes rapprochées
         const now = Date.now();
         if (!forceImmediate && (now - this.lastSaveTime) < this.minSaveInterval) {
             if (this.debounceTimeout) {
                 clearTimeout(this.debounceTimeout);
             }
-            
+
             this.debounceTimeout = setTimeout(() => {
                 this.performSave(canvas, layer);
                 this.debounceTimeout = null;
             }, this.minSaveInterval);
             return;
         }
-        
+
         this.performSave(canvas, layer);
     }
 
@@ -79,22 +74,46 @@
         console.log('🔍 [UNDO DEBUG] isUpdatingProjections:', this.state.isUpdatingProjections);
         console.log('🔍 [UNDO DEBUG] isSavingVehicle:', this.state.isSavingVehicle);
         console.log('🔍 [UNDO DEBUG] Pile undo avant:', layer.undoStack.length);
+        console.log('🔍 [UNDO DEBUG] Pile redo avant:', layer.redoStack.length);
         console.log('🔍 [UNDO DEBUG] currentMode:', this.state.currentMode);
-        
-        // Vider la pile redo quand on fait une nouvelle action
+
+        // ✅ Vider la pile redo quand on fait une nouvelle action
+        // Cela empêche de "redo" après avoir fait une nouvelle action
+        const redoBefore = layer.redoStack.length;
         layer.redoStack = [];
-        
+        if (redoBefore > 0) {
+            console.log(`🗑️ [UNDO/REDO] Pile redo vidée (${redoBefore} états supprimés) - Nouvelle action en cours`);
+        }
+
         const state = canvas.toJSON(this.state.fabricPropertiesToInclude);
-        
-        // ✅ MODIFIÉ : Filtrage plus simple et efficace
+
+        console.log('🔍 [UNDO DEBUG] Objets bruts:', state.objects.length);
+
+        // ✅ CORRECTION : Filtrage amélioré pour inclure les objets guides temporaires
         const filteredObjects = state.objects.filter(obj => {
-            // Exclure les guides temporaires (objets non-sélectionnables sans propriétés spéciales)
-            if (obj.selectable === false && !obj.isBaseline && !obj.isZeroPoint && 
-                !obj.isProjectionElement && !obj.isMeasurement && !obj.isScaleBar && 
-                !obj.isLandmark && !obj.isVehicle) {
-                return false;
+            // Identifier les éléments de l'application qui doivent toujours être conservés
+            const isAppElement = obj.isBaseline || obj.isZeroPoint ||
+                                obj.isProjectionElement || obj.isMeasurement ||
+                                obj.isScaleBar || obj.isLandmark || obj.isVehicle;
+
+            // Identifier les objets sélectionnables (utilisés par l'utilisateur)
+            const isSelectable = obj.selectable !== false;
+
+            // Identifier les guides visibles temporaires (lignes, textes, formes géométriques)
+            // Ces objets sont utilisés pendant le dessin et doivent être préservés dans l'historique
+            const isGuideObject = obj.selectable === false &&
+                                 (obj.type === 'line' || obj.type === 'text' ||
+                                  obj.type === 'rect' || obj.type === 'circle' ||
+                                  obj.type === 'path' || obj.type === 'group');
+
+            // Garder : éléments de l'application OU objets sélectionnables OU guides visibles
+            const shouldKeep = isAppElement || isSelectable || isGuideObject;
+
+            if (!shouldKeep) {
+                console.log(`🔍 [FILTRAGE] Exclut: ${obj.type} (selectable:${obj.selectable})`);
             }
-            return true;
+
+            return shouldKeep;
         });
         
         const cleanState = { ...state, objects: filteredObjects };
@@ -117,8 +136,14 @@
         layer.undoStack.forEach((state, index) => {
             console.log(`  [${index}] ${state.objects.length} objets`);
         });
-        console.log(`  Pile redo: ${layer.redoStack.length} états`);
-        
+        console.log(`  ✅ Pile redo: ${layer.redoStack.length} états (doit être 0 après nouvelle action)`);
+
+        // Vérification de sécurité pour s'assurer que la pile redo est bien vide
+        if (layer.redoStack.length > 0) {
+            console.warn('⚠️ [UNDO/REDO] ATTENTION: La pile redo n\'est pas vide après une nouvelle action!');
+            layer.redoStack = []; // Forcer le vidage
+        }
+
         document.dispatchEvent(new CustomEvent('update-undo-redo-buttons'));
     }
 
@@ -159,51 +184,58 @@
         // Ne pas forcer pendant le mode fill pour éviter les sauvegardes multiples
         if (this.state.currentMode === 'fill') return;
 
-        // ✅ NOUVEAU : Ne pas forcer pendant la création de courbe
-        if (this.state.isCreatingCurve) {
-            console.log('🎯 [CURVE DEBUG] ForceSave bloquée - création courbe en cours');
+        // ✅ SIMPLIFIÉ : Regrouper les conditions de blocage
+        const blockedOperations = [
+            this.state.isCreatingCurve,
+            this.state.isModifyingVehicle,
+            // ❌ SUPPRIMÉ : isUpdatingProjections ne doit PAS bloquer les nouvelles actions de l'utilisateur
+            // this.state.isUpdatingProjections,
+            this.state.isSavingVehicle && !allowDuringVehicleSave
+        ];
+
+        if (blockedOperations.some(condition => condition)) {
+            console.log('🚫 [FORCE SAVE] Bloqué - Conditions:', {
+                isCreatingCurve: this.state.isCreatingCurve,
+                isModifyingVehicle: this.state.isModifyingVehicle,
+                isUpdatingProjections: this.state.isUpdatingProjections,
+                isSavingVehicle: this.state.isSavingVehicle,
+                allowDuringVehicleSave: allowDuringVehicleSave
+            });
             return;
         }
 
-        // 🚗 NOUVEAU : Ne pas forcer pendant la modification de véhicules
-        if (this.state.isModifyingVehicle) {
-            console.log('🚗 [VEHICLE] ForceSave bloquée - modification véhicule en cours');
-            return;
-        }
+        console.log('💪 [FORCE SAVE] Exécuté - Stack:', new Error().stack.split('\n').slice(1, 3).map(line => line.trim()).join(' → '));
 
-        // 🚗 NOUVEAU : Ne pas forcer pendant la mise à jour des projections
-        if (this.state.isUpdatingProjections) {
-            console.log('🚗 [PROJECTIONS] ForceSave bloquée - mise à jour projections en cours');
-            return;
-        }
-
-        // 🚗 NOUVEAU : Si une sauvegarde de véhicule est déjà en cours, ne pas en ajouter une autre
-        // SAUF si allowDuringVehicleSave est true (appel autorisé)
-        if (this.state.isSavingVehicle && !allowDuringVehicleSave) {
-            console.log('🚗 [VEHICLE] ForceSave bloquée - sauvegarde de véhicule déjà en cours');
-            return;
-        }
-
-        console.log('💪 [FORCE SAVE] ForceSave exécuté - isModifyingVehicle:', this.state.isModifyingVehicle, 'isUpdatingProjections:', this.state.isUpdatingProjections, 'isSavingVehicle:', this.state.isSavingVehicle, 'allowDuringVehicleSave:', allowDuringVehicleSave);
-        const stack = new Error().stack.split('\n').slice(1, 4).map(line => line.trim()).join(' → ');
-        console.log('💪 [FORCE SAVE] Stack:', stack);
-        
         this.lastSaveTime = Date.now();
         this.pendingSave = false;
-        
-        // Vider la pile redo quand on fait une nouvelle action
+
+        // ✅ Vider la pile redo quand on fait une nouvelle action
+        const redoBefore = layer.redoStack.length;
         layer.redoStack = [];
+        if (redoBefore > 0) {
+            console.log(`🗑️ [FORCE SAVE] Pile redo vidée (${redoBefore} états supprimés)`);
+        }
         
         const state = canvas.toJSON(this.state.fabricPropertiesToInclude);
-        
-        // Filtrage des objets (comme dans performSave)
+
+        // ✅ CORRECTION : Filtrage amélioré (cohérent avec performSave)
         const filteredObjects = state.objects.filter(obj => {
-            if (obj.selectable === false && !obj.isBaseline && !obj.isZeroPoint && 
-                !obj.isProjectionElement && !obj.isMeasurement && !obj.isScaleBar && 
-                !obj.isLandmark && !obj.isVehicle) {
-                return false;
-            }
-            return true;
+            // Identifier les éléments de l'application qui doivent toujours être conservés
+            const isAppElement = obj.isBaseline || obj.isZeroPoint ||
+                                obj.isProjectionElement || obj.isMeasurement ||
+                                obj.isScaleBar || obj.isLandmark || obj.isVehicle;
+
+            // Identifier les objets sélectionnables (utilisés par l'utilisateur)
+            const isSelectable = obj.selectable !== false;
+
+            // Identifier les guides visibles temporaires (lignes, textes, formes géométriques)
+            const isGuideObject = obj.selectable === false &&
+                                 (obj.type === 'line' || obj.type === 'text' ||
+                                  obj.type === 'rect' || obj.type === 'circle' ||
+                                  obj.type === 'path' || obj.type === 'group');
+
+            // Garder : éléments de l'application OU objets sélectionnables OU guides visibles
+            return isAppElement || isSelectable || isGuideObject;
         });
         
         const cleanState = { ...state, objects: filteredObjects };
@@ -221,7 +253,14 @@
         layer.undoStack.forEach((state, index) => {
             console.log(`  [${index}] ${state.objects.length} objets`);
         });
-        
+        console.log(`  ✅ Pile redo: ${layer.redoStack.length} états (doit être 0 après nouvelle action)`);
+
+        // Vérification de sécurité pour s'assurer que la pile redo est bien vide
+        if (layer.redoStack.length > 0) {
+            console.warn('⚠️ [FORCE SAVE] ATTENTION: La pile redo n\'est pas vide après une nouvelle action!');
+            layer.redoStack = []; // Forcer le vidage
+        }
+
         document.dispatchEvent(new CustomEvent('update-undo-redo-buttons'));
     }
 
@@ -285,25 +324,32 @@
         });
 
         canvas.loadFromJSON(prevState, () => {
-            console.log('🔄 [UNDO DEBUG] Après restauration - objets restaurés:', canvas.getObjects().length);
+            try {
+                console.log('🔄 [UNDO DEBUG] Après restauration - objets restaurés:', canvas.getObjects().length);
 
-            // 🎯 NOUVEAU : Remettre les mesures déplacées manuellement sur le canvas
-            manuallyMovedProjections.forEach(cloned => {
-                const key = cloned.projectionId + '_' + cloned.projectionRole;
-                console.log(`🔄 [UNDO] Restauration de la mesure déplacée: ${key} à (${cloned.left.toFixed(1)}, ${cloned.top.toFixed(1)})`);
-                canvas.add(cloned);
-            });
+                // 🎯 NOUVEAU : Remettre les mesures déplacées manuellement sur le canvas
+                manuallyMovedProjections.forEach(cloned => {
+                    const key = cloned.projectionId + '_' + cloned.projectionRole;
+                    console.log(`🔄 [UNDO] Restauration de la mesure déplacée: ${key} à (${cloned.left.toFixed(1)}, ${cloned.top.toFixed(1)})`);
+                    canvas.add(cloned);
+                });
 
-            canvas.getObjects().forEach((obj, i) => {
-                console.log(`  Restauré[${i}] ${obj.type} - visible:${obj.visible} - left:${obj.left} top:${obj.top}`);
-            });
+                canvas.getObjects().forEach((obj, i) => {
+                    console.log(`  Restauré[${i}] ${obj.type} - visible:${obj.visible} - left:${obj.left} top:${obj.top}`);
+                });
 
-            // 🚗 NOUVEAU : Détecter les véhicules déplacés par l'undo et réinitialiser leurs mesures
-            const movedVehicleIds = this.findMovedVehicles(vehiclePositionsBefore, canvas);
-            console.log(`🚗 [UNDO] Véhicules déplacés par l'undo:`, movedVehicleIds);
+                // 🚗 NOUVEAU : Détecter les véhicules déplacés par l'undo et réinitialiser leurs mesures
+                const movedVehicleIds = this.findMovedVehicles(vehiclePositionsBefore, canvas);
+                console.log(`🚗 [UNDO] Véhicules déplacés par l'undo:`, movedVehicleIds);
 
-            canvas.renderAll();
-            this.finishUndoRedoOperation(movedVehicleIds);
+                canvas.renderAll();
+                this.finishUndoRedoOperation(movedVehicleIds);
+            } catch (error) {
+                console.error('❌ [UNDO] Erreur lors de la restauration:', error);
+                // S'assurer que l'état est libéré même en cas d'erreur
+                this.state.isLoadingState = false;
+                document.dispatchEvent(new CustomEvent('update-undo-redo-buttons'));
+            }
         });
 
         return true;
@@ -354,19 +400,26 @@
         });
 
         canvas.loadFromJSON(nextState, () => {
-            // 🎯 NOUVEAU : Remettre les mesures déplacées manuellement sur le canvas
-            manuallyMovedProjections.forEach(cloned => {
-                const key = cloned.projectionId + '_' + cloned.projectionRole;
-                console.log(`🔄 [REDO] Restauration de la mesure déplacée: ${key} à (${cloned.left.toFixed(1)}, ${cloned.top.toFixed(1)})`);
-                canvas.add(cloned);
-            });
+            try {
+                // 🎯 NOUVEAU : Remettre les mesures déplacées manuellement sur le canvas
+                manuallyMovedProjections.forEach(cloned => {
+                    const key = cloned.projectionId + '_' + cloned.projectionRole;
+                    console.log(`🔄 [REDO] Restauration de la mesure déplacée: ${key} à (${cloned.left.toFixed(1)}, ${cloned.top.toFixed(1)})`);
+                    canvas.add(cloned);
+                });
 
-            // 🚗 NOUVEAU : Détecter les véhicules déplacés par le redo et réinitialiser leurs mesures
-            const movedVehicleIds = this.findMovedVehicles(vehiclePositionsBefore, canvas);
-            console.log(`🚗 [REDO] Véhicules déplacés par le redo:`, movedVehicleIds);
+                // 🚗 NOUVEAU : Détecter les véhicules déplacés par le redo et réinitialiser leurs mesures
+                const movedVehicleIds = this.findMovedVehicles(vehiclePositionsBefore, canvas);
+                console.log(`🚗 [REDO] Véhicules déplacés par le redo:`, movedVehicleIds);
 
-            canvas.renderAll();
-            this.finishUndoRedoOperation(movedVehicleIds);
+                canvas.renderAll();
+                this.finishUndoRedoOperation(movedVehicleIds);
+            } catch (error) {
+                console.error('❌ [REDO] Erreur lors de la restauration:', error);
+                // S'assurer que l'état est libéré même en cas d'erreur
+                this.state.isLoadingState = false;
+                document.dispatchEvent(new CustomEvent('update-undo-redo-buttons'));
+            }
         });
 
         return true;
