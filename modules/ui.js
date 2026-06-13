@@ -441,7 +441,7 @@
             const rotationControlHTML =
                 `<div class="rotation-control">
                         <label>Angle:</label>
-                        <input type="number" class="rotation-input" min="0" max="360" step="1" value="${layer.angle}" ${rotationDisabled ? 'disabled' : ''}> °
+                        <input type="number" class="rotation-input" min="-360" max="360" step="1" value="${layer.angle}" ${rotationDisabled ? 'disabled' : ''}> °
                    </div>`;
 
             // 🟦 NOUVEAU : Case à cocher pour le fond blanc (uniquement pour le calque de dessin)
@@ -523,7 +523,7 @@
 
                     let angle = parseFloat(e.target.value);
                     if (isNaN(angle)) angle = 0;
-                    angle = Math.max(0, Math.min(360, angle));
+                    angle = Math.max(-360, Math.min(360, angle));
                     e.target.value = angle;
                     this.layerManager.setLayerAngle(layer.id, angle);
                 });
